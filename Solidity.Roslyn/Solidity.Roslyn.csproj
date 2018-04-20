@@ -1,4 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">    <PropertyGroup>     <TargetFramework>netstandard2.0</TargetFramework>   </PropertyGroup>    <ItemGroup>
-  <PackageReference Include="CodeGeneration.Roslyn" Version="1.4.0-gd183dac6dc" />
-  <PackageReference Include="CodeGeneration.Roslyn.Attributes" Version="1.4.0-gd183dac6dc" />
-</ItemGroup>  </Project> 
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CodeGeneration.Roslyn" Version="1.4.0-gd183dac6dc" />
+    <PackageReference Include="CodeGeneration.Roslyn.Attributes" Version="1.4.0-gd183dac6dc" />
+  </ItemGroup>
+</Project>
