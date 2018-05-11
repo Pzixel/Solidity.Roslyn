@@ -4,16 +4,15 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CodeGeneration.Roslyn" Version="1.5.0" />
-    <PackageReference Include="CodeGeneration.Roslyn.Attributes" Version="1.5.0" />
-    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="1.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.42" />
+
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
-  </ItemGroup>
-  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.42" />
+
+
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
-    <DotNetCliToolReference Include="dotnet-codegen" Version="1.5.0" />
   </ItemGroup>
 </Project>
