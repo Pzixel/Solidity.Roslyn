@@ -3,6 +3,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CodeGeneration.Roslyn" Version="0.4.42" />
+    <PackageReference Include="CodeGeneration.Roslyn" Version="0.4.62" />
   </ItemGroup>
 </Project>
