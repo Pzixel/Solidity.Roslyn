@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,10 +15,15 @@ namespace Solidity.Roslyn
 {
     public class SolidityGenerator : ICodeGenerator
     {
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+        public SolidityGenerator(AttributeData attributeData)
+        {
+        }
+
         public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
         {
             var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories).Select(File.ReadAllText);
-            var contracts = solidityFiles.SelectMany(file => Regex.Matches(file, @"contract\W+(\w+)").Cast<Match>().Select(x => x.Groups[1].Value)).ToArray();
+            var contracts = solidityFiles.SelectMany(file => Regex.Matches(file, @"^\s*contract\s+(\w+)", RegexOptions.Multiline).Cast<Match>().Select(x => x.Groups[1].Value)).ToArray();
 
             var results = contracts.Select(x=>ClassDeclaration(x)
                 .AddMembers(
