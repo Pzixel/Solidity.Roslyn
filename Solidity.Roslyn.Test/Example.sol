@@ -5,7 +5,7 @@ contract mortal {
     address owner;
 
     /* This function is executed at initialization and sets the owner of the contract */
-    function mortal() public {
+    function mortal(uint64 a, uint b) public {
         owner = msg.sender;
     }
 
@@ -14,6 +14,14 @@ contract mortal {
         if (msg.sender == owner) {
             selfdestruct(owner);
         }
+    }
+
+    function testValue() public returns (string) {
+        return "";
+    }
+
+    function testTuple() public returns (int, int) {
+        return (1,2);
     }
 }
 
