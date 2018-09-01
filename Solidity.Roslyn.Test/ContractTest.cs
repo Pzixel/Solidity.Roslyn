@@ -1,4 +1,5 @@
-﻿using Solidity.Roslyn;
+﻿using Example;
+using Solidity.Roslyn;
 using Xunit;
 
 [assembly: Solidity]
