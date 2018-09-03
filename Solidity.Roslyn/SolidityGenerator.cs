@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -134,29 +133,38 @@ namespace Solidity.Roslyn
                 {
                     var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
 
-                    var methodParameters = new SyntaxNodeOrToken[]
-                    {
-                        Parameter(
-                                web3Identifier)
-                            .WithType(
-                                IdentifierName(nameof(Web3)))
-                    }.Concat(inputParameters.SelectMany(input => new[]
+                    var methodParameters = inputParameters.SelectMany(input => new[]
                     {
                         Token(SyntaxKind.CommaToken),
                         (SyntaxNodeOrToken) Parameter(
                                 Identifier(input.Name))
                             .WithType(
                                 IdentifierName(input.Type.Name))
-                    })).ToArray();
+                    }).Skip(1).ToArray();
 
-                    var callParameters = inputParameters.SelectMany(input => new[]
+                    var initializerParameters = inputParameters.SelectMany(input => new[]
                     {
                         Token(SyntaxKind.CommaToken),
                         (SyntaxNodeOrToken) IdentifierName(input.Name)
                     }).Skip(1).ToArray();
 
+                    var callParameters = inputParameters.SelectMany(input => new[]
+                    {
+                        Token(SyntaxKind.CommaToken),
+                        (SyntaxNodeOrToken) Argument(IdentifierName(input.Name))
+                    }).Skip(1).ToArray();
+
                     if (abi.Type == MemberType.Constructor)
                     {
+                        var constructorParameters = new SyntaxNodeOrToken[]
+                        {
+                            Parameter(
+                                    web3Identifier)
+                                .WithType(
+                                    IdentifierName(nameof(Web3))),
+                            Token(SyntaxKind.CommaToken)
+                        }.Concat(methodParameters).ToArray();
+
                         return MethodDeclaration(
                                    GenericName(
                                            Identifier("Task"))
@@ -170,7 +178,7 @@ namespace Solidity.Roslyn
                                .WithParameterList(
                                    ParameterList(
                                        SeparatedList<ParameterSyntax>(
-                                           methodParameters)))
+                                           constructorParameters)))
                                .WithBody(
                                    Block(
                                        LocalDeclarationStatement(
@@ -215,7 +223,7 @@ namespace Solidity.Roslyn
                                                                         InitializerExpression(
                                                                             SyntaxKind.ArrayInitializerExpression,
                                                                             SeparatedList<ExpressionSyntax>(
-                                                                                callParameters))))}))))))))),
+                                                                                initializerParameters))))}))))))))),
                                        ReturnStatement(
                                            ObjectCreationExpression(
                                                    IdentifierName(contractClassDeclaration.Identifier))
@@ -233,6 +241,56 @@ namespace Solidity.Roslyn
                                                                        IdentifierName("receipt"),
                                                                        IdentifierName("ContractAddress")))
                                                            }))))));
+                    }
+
+                    if (abi.Outputs.Length > 0)
+                    {
+                        if (abi.Outputs.Length == 1)
+                        {
+                            string outputType = Solidity.SolidityTypesToCsTypes[abi.Outputs.Single().Type].Name;
+                            return MethodDeclaration(
+                                       GenericName(
+                                               Identifier("Task"))
+                                           .WithTypeArgumentList(
+                                               TypeArgumentList(
+                                                   SingletonSeparatedList<TypeSyntax>(
+                                                       IdentifierName(outputType)))),
+                                       Identifier(Capitalize(abi.Name) + "Async"))
+                                   .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                                   .WithParameterList(
+                                       ParameterList(
+                                           SeparatedList<ParameterSyntax>(
+                                               methodParameters)))
+                                   .WithExpressionBody(
+                                       ArrowExpressionClause(
+                                           InvocationExpression(
+                                                   MemberAccessExpression(
+                                                       SyntaxKind.SimpleMemberAccessExpression,
+                                                       InvocationExpression(
+                                                               MemberAccessExpression(
+                                                                   SyntaxKind.SimpleMemberAccessExpression,
+                                                                   IdentifierName("Contract"),
+                                                                   IdentifierName("GetFunction")))
+                                                           .WithArgumentList(
+                                                               ArgumentList(
+                                                                   SingletonSeparatedList(
+                                                                       Argument(
+                                                                           LiteralExpression(
+                                                                               SyntaxKind.StringLiteralExpression,
+                                                                               Literal(abi.Name)))))),
+                                                       GenericName(
+                                                               Identifier("CallAsync"))
+                                                           .WithTypeArgumentList(
+                                                               TypeArgumentList(
+                                                                   SingletonSeparatedList<TypeSyntax>(
+                                                                       IdentifierName(outputType))))))
+                                               .WithArgumentList(
+                                                   ArgumentList(
+                                                       SeparatedList<ArgumentSyntax>(
+                                                           callParameters)))))
+                                   .WithSemicolonToken(
+                                       Token(SyntaxKind.SemicolonToken));
+                        }
                     }
 
                     var methodDeclarationSyntax = MethodDeclaration(

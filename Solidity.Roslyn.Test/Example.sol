@@ -16,11 +16,11 @@ contract mortal {
         }
     }
 
-    function testValue() public returns (string) {
+    function testValue(int a) public returns (string) {
         return "";
     }
 
-    function testTuple() public returns (int, int) {
+    function testTuple(uint16 a, int8 b) public returns (int, int) {
         return (1,2);
     }
 }
