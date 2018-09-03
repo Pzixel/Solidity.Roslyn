@@ -127,9 +127,32 @@ namespace Solidity.Roslyn
                                                                    Block()));
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
-
+                
                 var methods = abis.Select(abi =>
                 {
+                    var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
+
+                    var methodParameters = new SyntaxNodeOrToken[]
+                    {
+                        Parameter(
+                                Identifier("web3"))
+                            .WithType(
+                                IdentifierName(nameof(Web3)))
+                    }.Concat(inputParameters.SelectMany(input => new[]
+                    {
+                        Token(SyntaxKind.CommaToken),
+                        (SyntaxNodeOrToken) Parameter(
+                                Identifier(input.Name))
+                            .WithType(
+                                IdentifierName(input.Type.Name))
+                    })).ToArray();
+
+                    var callParameters = inputParameters.SelectMany(input => new[]
+                    {
+                        Token(SyntaxKind.CommaToken),
+                        (SyntaxNodeOrToken) IdentifierName(input.Name)
+                    }).Skip(1).ToArray();
+
                     if (abi.Type == MemberType.Constructor)
                     {
                         return MethodDeclaration(
@@ -144,11 +167,8 @@ namespace Solidity.Roslyn
                                    TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword), Token(SyntaxKind.AsyncKeyword)))
                                .WithParameterList(
                                    ParameterList(
-                                       SingletonSeparatedList(
-                                           Parameter(
-                                                   Identifier("web3"))
-                                               .WithType(
-                                                   IdentifierName(nameof(Web3))))))
+                                       SeparatedList<ParameterSyntax>(
+                                           methodParameters)))
                                .WithBody(
                                    Block(
                                        LocalDeclarationStatement(
@@ -185,7 +205,7 @@ namespace Solidity.Roslyn
                                                                             PredefinedType(
                                                                                 Token(SyntaxKind.ObjectKeyword)))
                                                                         .WithRankSpecifiers(
-                                                                            SingletonList<ArrayRankSpecifierSyntax>(
+                                                                            SingletonList(
                                                                                 ArrayRankSpecifier(
                                                                                     SingletonSeparatedList<ExpressionSyntax>(
                                                                                         OmittedArraySizeExpression())))))
@@ -193,18 +213,7 @@ namespace Solidity.Roslyn
                                                                         InitializerExpression(
                                                                             SyntaxKind.ArrayInitializerExpression,
                                                                             SeparatedList<ExpressionSyntax>(
-                                                                                new SyntaxNodeOrToken[]{
-                                                                                    LiteralExpression(
-                                                                                        SyntaxKind.NumericLiteralExpression,
-                                                                                        Literal(1)),
-                                                                                    Token(SyntaxKind.CommaToken),
-                                                                                    LiteralExpression(
-                                                                                        SyntaxKind.NumericLiteralExpression,
-                                                                                        Literal(2)),
-                                                                                    Token(SyntaxKind.CommaToken),
-                                                                                    LiteralExpression(
-                                                                                        SyntaxKind.NumericLiteralExpression,
-                                                                                        Literal(3))}))))}))))))))),
+                                                                                callParameters))))}))))))))),
                                        ReturnStatement(
                                            ObjectCreationExpression(
                                                    IdentifierName(contractClassDeclaration.Identifier))
@@ -243,6 +252,12 @@ namespace Solidity.Roslyn
                                            .WithUsings(
                                                List(
                                                    new[]{
+                                                       UsingDirective(
+                                                           IdentifierName("System")),
+                                                       UsingDirective(
+                                                           QualifiedName(
+                                                               IdentifierName("System"),
+                                                               IdentifierName("Numerics"))),
                                                        UsingDirective(
                                                            QualifiedName(
                                                                QualifiedName(
