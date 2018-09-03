@@ -57,7 +57,9 @@ namespace Solidity.Roslyn
                 string namespaceName = Path.GetFileNameWithoutExtension(x.Key.Remove(separatorIndex));
 
                 var abiIdentifier = Identifier("Abi");
-                var classDeclaration = ClassDeclaration(contract)
+                var binIdentifier = Identifier("Bin");
+
+                var contractClassDeclaration = ClassDeclaration(contract)
                     .AddMembers(
                         FieldDeclaration(
                                 VariableDeclaration(
@@ -75,7 +77,7 @@ namespace Solidity.Roslyn
                                 VariableDeclaration(
                                         PredefinedType(Token(SyntaxKind.StringKeyword)))
                                     .AddVariables(
-                                        VariableDeclarator(Identifier("Bin"))
+                                        VariableDeclarator(binIdentifier)
                                             .WithInitializer(
                                                 EqualsValueClause(
                                                     LiteralExpression(
@@ -88,8 +90,8 @@ namespace Solidity.Roslyn
                                                SingletonSeparatedList<BaseTypeSyntax>(
                                                    SimpleBaseType(
                                                        IdentifierName(nameof(ContractBase))))));
-                classDeclaration = classDeclaration.AddMembers(ConstructorDeclaration(
-                                                                   classDeclaration.Identifier)
+                contractClassDeclaration = contractClassDeclaration.AddMembers(ConstructorDeclaration(
+                                                                   contractClassDeclaration.Identifier)
                                                                .WithModifiers(
                                                                    TokenList(
                                                                        Token(SyntaxKind.PublicKeyword)))
@@ -117,7 +119,7 @@ namespace Solidity.Roslyn
                                                                                        IdentifierName("web3")),
                                                                                    Token(SyntaxKind.CommaToken),
                                                                                    Argument(
-                                                                                       IdentifierName(abiIdentifier.ValueText)),
+                                                                                       IdentifierName(abiIdentifier)),
                                                                                    Token(SyntaxKind.CommaToken),
                                                                                    Argument(
                                                                                        IdentifierName("address"))}))))
@@ -128,14 +130,103 @@ namespace Solidity.Roslyn
 
                 var methods = abis.Select(abi =>
                 {
-                    var method = abi.Type == MemberType.Constructor
-                                     ? MethodDeclaration(
-                                         IdentifierName("Task"),
-                                         Identifier("DeployAsync")).WithModifiers(TokenList(Token(SyntaxKind.StaticKeyword)))
-                                     : MethodDeclaration(
-                                         IdentifierName("Task"),
-                                         Identifier(Capitalize(abi.Name) + "Async"));
-                    var methodDeclarationSyntax = method
+                    if (abi.Type == MemberType.Constructor)
+                    {
+                        return MethodDeclaration(
+                                   GenericName(
+                                           Identifier("Task"))
+                                       .WithTypeArgumentList(
+                                           TypeArgumentList(
+                                               SingletonSeparatedList<TypeSyntax>(
+                                                   IdentifierName(contractClassDeclaration.Identifier)))),
+                                   Identifier("DeployAsync"))
+                               .WithModifiers(
+                                   TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword), Token(SyntaxKind.AsyncKeyword)))
+                               .WithParameterList(
+                                   ParameterList(
+                                       SingletonSeparatedList(
+                                           Parameter(
+                                                   Identifier("web3"))
+                                               .WithType(
+                                                   IdentifierName(nameof(Web3))))))
+                               .WithBody(
+                                   Block(
+                                       LocalDeclarationStatement(
+                                           VariableDeclaration(
+                                                   IdentifierName("var"))
+                                               .WithVariables(
+                                                   SingletonSeparatedList(
+                                                       VariableDeclarator(
+                                                               Identifier("receipt"))
+                                                           .WithInitializer(
+                                                               EqualsValueClause(
+                                                                   AwaitExpression(
+                                                                       InvocationExpression(
+                                                                               MemberAccessExpression(
+                                                                                   SyntaxKind.SimpleMemberAccessExpression,
+                                                                                   IdentifierName(nameof(ContractBase)),
+                                                                                   IdentifierName("DeployAsync")))
+                                                                           .WithArgumentList(
+                                                    ArgumentList(
+                                                        SeparatedList<ArgumentSyntax>(
+                                                            new SyntaxNodeOrToken[]{
+                                                                Argument(
+                                                                    IdentifierName("web3")),
+                                                                Token(SyntaxKind.CommaToken),
+                                                                Argument(
+                                                                    IdentifierName("Abi")),
+                                                                Token(SyntaxKind.CommaToken),
+                                                                Argument(
+                                                                    IdentifierName("Bin")),
+                                                                Token(SyntaxKind.CommaToken),
+                                                                Argument(
+                                                                    ArrayCreationExpression(
+                                                                        ArrayType(
+                                                                            PredefinedType(
+                                                                                Token(SyntaxKind.ObjectKeyword)))
+                                                                        .WithRankSpecifiers(
+                                                                            SingletonList<ArrayRankSpecifierSyntax>(
+                                                                                ArrayRankSpecifier(
+                                                                                    SingletonSeparatedList<ExpressionSyntax>(
+                                                                                        OmittedArraySizeExpression())))))
+                                                                    .WithInitializer(
+                                                                        InitializerExpression(
+                                                                            SyntaxKind.ArrayInitializerExpression,
+                                                                            SeparatedList<ExpressionSyntax>(
+                                                                                new SyntaxNodeOrToken[]{
+                                                                                    LiteralExpression(
+                                                                                        SyntaxKind.NumericLiteralExpression,
+                                                                                        Literal(1)),
+                                                                                    Token(SyntaxKind.CommaToken),
+                                                                                    LiteralExpression(
+                                                                                        SyntaxKind.NumericLiteralExpression,
+                                                                                        Literal(2)),
+                                                                                    Token(SyntaxKind.CommaToken),
+                                                                                    LiteralExpression(
+                                                                                        SyntaxKind.NumericLiteralExpression,
+                                                                                        Literal(3))}))))}))))))))),
+                                       ReturnStatement(
+                                           ObjectCreationExpression(
+                                                   IdentifierName(contractClassDeclaration.Identifier))
+                                               .WithArgumentList(
+                                                   ArgumentList(
+                                                       SeparatedList<ArgumentSyntax>(
+                                                           new SyntaxNodeOrToken[]
+                                                           {
+                                                               Argument(
+                                                                   IdentifierName("web3")),
+                                                               Token(SyntaxKind.CommaToken),
+                                                               Argument(
+                                                                   MemberAccessExpression(
+                                                                       SyntaxKind.SimpleMemberAccessExpression,
+                                                                       IdentifierName("receipt"),
+                                                                       IdentifierName("ContractAddress")))
+                                                           }))))));
+                    }
+
+                    var methodDeclarationSyntax = MethodDeclaration(
+                                                      IdentifierName("Task"),
+                                                      Identifier(Capitalize(abi.Name) + "Async"))
                                                   .AddModifiers(Token(SyntaxKind.PublicKeyword))
                                                   .WithExpressionBody(
                                                       ArrowExpressionClause(
@@ -146,7 +237,7 @@ namespace Solidity.Roslyn
                     return methodDeclarationSyntax;
                 });
 
-                var classDeclarationWithMethods = classDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>().ToArray());
+                var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>().ToArray());
 
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                                            .WithUsings(
