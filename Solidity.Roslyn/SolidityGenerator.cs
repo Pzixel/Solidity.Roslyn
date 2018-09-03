@@ -58,6 +58,7 @@ namespace Solidity.Roslyn
 
                 var abiIdentifier = Identifier("Abi");
                 var binIdentifier = Identifier("Bin");
+                var web3Identifier = Identifier("web3");
 
                 var contractClassDeclaration = ClassDeclaration(contract)
                     .AddMembers(
@@ -90,6 +91,7 @@ namespace Solidity.Roslyn
                                                SingletonSeparatedList<BaseTypeSyntax>(
                                                    SimpleBaseType(
                                                        IdentifierName(nameof(ContractBase))))));
+                
                 contractClassDeclaration = contractClassDeclaration.AddMembers(ConstructorDeclaration(
                                                                    contractClassDeclaration.Identifier)
                                                                .WithModifiers(
@@ -100,7 +102,7 @@ namespace Solidity.Roslyn
                                                                        SeparatedList<ParameterSyntax>(
                                                                            new SyntaxNodeOrToken[]{
                                                                                Parameter(
-                                                                                       Identifier("web3"))
+                                                                                       web3Identifier)
                                                                                    .WithType(
                                                                                        IdentifierName(nameof(Web3))),
                                                                                Token(SyntaxKind.CommaToken),
@@ -116,7 +118,7 @@ namespace Solidity.Roslyn
                                                                            SeparatedList<ArgumentSyntax>(
                                                                                new SyntaxNodeOrToken[]{
                                                                                    Argument(
-                                                                                       IdentifierName("web3")),
+                                                                                       IdentifierName(web3Identifier)),
                                                                                    Token(SyntaxKind.CommaToken),
                                                                                    Argument(
                                                                                        IdentifierName(abiIdentifier)),
@@ -135,7 +137,7 @@ namespace Solidity.Roslyn
                     var methodParameters = new SyntaxNodeOrToken[]
                     {
                         Parameter(
-                                Identifier("web3"))
+                                web3Identifier)
                             .WithType(
                                 IdentifierName(nameof(Web3)))
                     }.Concat(inputParameters.SelectMany(input => new[]
@@ -191,13 +193,13 @@ namespace Solidity.Roslyn
                                                         SeparatedList<ArgumentSyntax>(
                                                             new SyntaxNodeOrToken[]{
                                                                 Argument(
-                                                                    IdentifierName("web3")),
+                                                                    IdentifierName(web3Identifier)),
                                                                 Token(SyntaxKind.CommaToken),
                                                                 Argument(
-                                                                    IdentifierName("Abi")),
+                                                                    IdentifierName(abiIdentifier)),
                                                                 Token(SyntaxKind.CommaToken),
                                                                 Argument(
-                                                                    IdentifierName("Bin")),
+                                                                    IdentifierName(binIdentifier)),
                                                                 Token(SyntaxKind.CommaToken),
                                                                 Argument(
                                                                     ArrayCreationExpression(
@@ -223,7 +225,7 @@ namespace Solidity.Roslyn
                                                            new SyntaxNodeOrToken[]
                                                            {
                                                                Argument(
-                                                                   IdentifierName("web3")),
+                                                                   IdentifierName(web3Identifier)),
                                                                Token(SyntaxKind.CommaToken),
                                                                Argument(
                                                                    MemberAccessExpression(
