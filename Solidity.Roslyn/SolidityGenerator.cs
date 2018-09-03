@@ -11,6 +11,7 @@ using CodeGeneration.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Nethereum.Web3;
 using Newtonsoft.Json;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -55,13 +56,14 @@ namespace Solidity.Roslyn
                 string contract = Capitalize(x.Key.Substring(separatorIndex + 1));
                 string namespaceName = Path.GetFileNameWithoutExtension(x.Key.Remove(separatorIndex));
 
+                var abiIdentifier = Identifier("Abi");
                 var classDeclaration = ClassDeclaration(contract)
                     .AddMembers(
                         FieldDeclaration(
                                 VariableDeclaration(
                                         PredefinedType(Token(SyntaxKind.StringKeyword)))
                                     .AddVariables(
-                                        VariableDeclarator(Identifier("Abi"))
+                                        VariableDeclarator(abiIdentifier)
                                             .WithInitializer(
                                                 EqualsValueClause(
                                                     LiteralExpression(
@@ -96,9 +98,9 @@ namespace Solidity.Roslyn
                                                                        SeparatedList<ParameterSyntax>(
                                                                            new SyntaxNodeOrToken[]{
                                                                                Parameter(
-                                                                                       Identifier("ethereumHandler"))
+                                                                                       Identifier("web3"))
                                                                                    .WithType(
-                                                                                       IdentifierName(nameof(IEthereumHandler))),
+                                                                                       IdentifierName(nameof(Web3))),
                                                                                Token(SyntaxKind.CommaToken),
                                                                                Parameter(
                                                                                        Identifier("address"))
@@ -112,7 +114,10 @@ namespace Solidity.Roslyn
                                                                            SeparatedList<ArgumentSyntax>(
                                                                                new SyntaxNodeOrToken[]{
                                                                                    Argument(
-                                                                                       IdentifierName("ethereumHandler")),
+                                                                                       IdentifierName("web3")),
+                                                                                   Token(SyntaxKind.CommaToken),
+                                                                                   Argument(
+                                                                                       IdentifierName(abiIdentifier.ValueText)),
                                                                                    Token(SyntaxKind.CommaToken),
                                                                                    Argument(
                                                                                        IdentifierName("address"))}))))
@@ -145,13 +150,18 @@ namespace Solidity.Roslyn
 
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                                            .WithUsings(
-                                               SingletonList(
-                                                   UsingDirective(
-                                                       QualifiedName(
+                                               List(
+                                                   new[]{
+                                                       UsingDirective(
                                                            QualifiedName(
-                                                               IdentifierName("System"),
-                                                               IdentifierName("Threading")),
-                                                           IdentifierName("Tasks")))))
+                                                               QualifiedName(
+                                                                   IdentifierName("System"),
+                                                                   IdentifierName("Threading")),
+                                                               IdentifierName("Tasks"))),
+                                                       UsingDirective(
+                                                           QualifiedName(
+                                                               IdentifierName("Nethereum"),
+                                                               IdentifierName("Web3")))}))
                     .AddMembers(classDeclarationWithMethods);
 
                 return namespaceDeclaration;
