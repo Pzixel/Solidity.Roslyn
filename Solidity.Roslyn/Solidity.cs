@@ -57,7 +57,7 @@ namespace Solidity.Roslyn
             ["bytes31"] = typeof(byte[]),
             ["bytes32"] = typeof(byte[]),
             ["bytes"] = typeof(byte[]),
-            ["string"] = typeof(string),
+            ["string"] = typeof(string)
         }.ToImmutableDictionary();
     }
 }

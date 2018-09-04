@@ -83,14 +83,12 @@ namespace Solidity.Roslyn
 
         public static bool IsEmptyAddress(string address) => string.IsNullOrEmpty(address) || address == EmptyAddress;
 
-        protected static Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string bin, object[] arguments)
-        {
-            return web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(
+        protected static Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string bin, object[] arguments) =>
+            web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(
                 abi,
                 bin,
                 web3.TransactionManager.Account.Address,
                 EthereumSettings.DeploymentGas,
                 values: arguments);
-        }
     }
 }

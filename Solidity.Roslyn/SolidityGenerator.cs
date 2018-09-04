@@ -50,7 +50,7 @@ namespace Solidity.Roslyn
             });
 
             var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>).SelectMany(x => x.Contracts);
-            
+
             var results = contracts.Select(x =>
             {
                 int separatorIndex = x.Key.LastIndexOf(':');
@@ -63,65 +63,65 @@ namespace Solidity.Roslyn
 
                 var contractClassDeclaration = ClassDeclaration(contract)
                                                .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                    .AddMembers(
-                        FieldDeclaration(
-                                VariableDeclaration(
-                                        PredefinedType(Token(SyntaxKind.StringKeyword)))
-                                    .AddVariables(
-                                        VariableDeclarator(abiIdentifier)
-                                            .WithInitializer(
-                                                EqualsValueClause(
-                                                    LiteralExpression(
-                                                        SyntaxKind.StringLiteralExpression,
-                                                        Literal(x.Value.Abi))))))
-                            .AddModifiers(Token(SyntaxKind.PublicKeyword),
-                                                     Token(SyntaxKind.ConstKeyword)),
-                        FieldDeclaration(
-                                VariableDeclaration(
-                                        PredefinedType(Token(SyntaxKind.StringKeyword)))
-                                    .AddVariables(
-                                        VariableDeclarator(binIdentifier)
-                                            .WithInitializer(
-                                                EqualsValueClause(
-                                                    LiteralExpression(
-                                                        SyntaxKind.StringLiteralExpression,
-                                                        Literal(x.Value.Bin))))))
-                            .AddModifiers(Token(SyntaxKind.PublicKeyword),
-                                                     Token(SyntaxKind.ConstKeyword)))
-                                       .AddBaseListTypes(
-                                           
+                                               .AddMembers(
+                                                   FieldDeclaration(
+                                                           VariableDeclaration(
+                                                                   PredefinedType(Token(SyntaxKind.StringKeyword)))
+                                                               .AddVariables(
+                                                                   VariableDeclarator(abiIdentifier)
+                                                                       .WithInitializer(
+                                                                           EqualsValueClause(
+                                                                               LiteralExpression(
+                                                                                   SyntaxKind.StringLiteralExpression,
+                                                                                   Literal(x.Value.Abi))))))
+                                                       .AddModifiers(Token(SyntaxKind.PublicKeyword),
+                                                                     Token(SyntaxKind.ConstKeyword)),
+                                                   FieldDeclaration(
+                                                           VariableDeclaration(
+                                                                   PredefinedType(Token(SyntaxKind.StringKeyword)))
+                                                               .AddVariables(
+                                                                   VariableDeclarator(binIdentifier)
+                                                                       .WithInitializer(
+                                                                           EqualsValueClause(
+                                                                               LiteralExpression(
+                                                                                   SyntaxKind.StringLiteralExpression,
+                                                                                   Literal(x.Value.Bin))))))
+                                                       .AddModifiers(Token(SyntaxKind.PublicKeyword),
+                                                                     Token(SyntaxKind.ConstKeyword)))
+                                               .AddBaseListTypes(
                                                    SimpleBaseType(
                                                        IdentifierName(nameof(ContractBase))));
-                
+
                 contractClassDeclaration = contractClassDeclaration.AddMembers(ConstructorDeclaration(
-                                                                   contractClassDeclaration.Identifier)
-                                                               .AddModifiers(
-                                                                   
-                                                                       Token(SyntaxKind.PublicKeyword))
-                                                               .AddParameterListParameters(
-                                                                               Parameter(
-                                                                                       web3Identifier)
-                                                                                   .WithType(
-                                                                                       IdentifierName(nameof(Web3))),
-                                                                               Parameter(
-                                                                                       Identifier("address"))
-                                                                                   .WithType(
-                                                                                       PredefinedType(
-                                                                                           Token(SyntaxKind.StringKeyword))))
-                                                               .WithInitializer(
-                                                                   ConstructorInitializer(
-                                                                       SyntaxKind.BaseConstructorInitializer,
-                                                                       ArgumentList(
-                                                                           SeparatedList(
-                                                                               new[]{
-                                                                                   Argument(
-                                                                                       IdentifierName(web3Identifier)),
-                                                                                   Argument(
-                                                                                       IdentifierName(abiIdentifier)),
-                                                                                   Argument(
-                                                                                       IdentifierName("address"))}))))
-                                                               .WithBody(
-                                                                   Block()));
+                                                                                   contractClassDeclaration.Identifier)
+                                                                               .AddModifiers(
+                                                                                   Token(SyntaxKind.PublicKeyword))
+                                                                               .AddParameterListParameters(
+                                                                                   Parameter(
+                                                                                           web3Identifier)
+                                                                                       .WithType(
+                                                                                           IdentifierName(nameof(Web3))),
+                                                                                   Parameter(
+                                                                                           Identifier("address"))
+                                                                                       .WithType(
+                                                                                           PredefinedType(
+                                                                                               Token(SyntaxKind.StringKeyword))))
+                                                                               .WithInitializer(
+                                                                                   ConstructorInitializer(
+                                                                                       SyntaxKind.BaseConstructorInitializer,
+                                                                                       ArgumentList(
+                                                                                           SeparatedList(
+                                                                                               new[]
+                                                                                               {
+                                                                                                   Argument(
+                                                                                                       IdentifierName(web3Identifier)),
+                                                                                                   Argument(
+                                                                                                       IdentifierName(abiIdentifier)),
+                                                                                                   Argument(
+                                                                                                       IdentifierName("address"))
+                                                                                               }))))
+                                                                               .WithBody(
+                                                                                   Block()));
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
 
@@ -130,7 +130,11 @@ namespace Solidity.Roslyn
                 var methods = abis.Select(abi =>
                 {
                     var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
-                    var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new { Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i + 1}", Type = Solidity.SolidityTypesToCsTypes[output.Type], OriginalType = output.Type }).ToArray();
+                    var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new
+                    {
+                        Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i + 1}", Type = Solidity.SolidityTypesToCsTypes[output.Type],
+                        OriginalType = output.Type
+                    }).ToArray();
 
                     var methodParameters = inputParameters.SelectMany(input => new[]
                     {
@@ -157,59 +161,59 @@ namespace Solidity.Roslyn
                             Parameter(
                                     web3Identifier)
                                 .WithType(
-                                    IdentifierName(nameof(Web3))),
+                                    IdentifierName(nameof(Web3)))
                         }.Concat(methodParameters).ToArray();
 
                         return MethodDeclaration(
                                    GenericName(
                                            Identifier("Task"))
                                        .AddTypeArgumentListArguments(
-                                                   IdentifierName(contractClassDeclaration.Identifier)),
+                                           IdentifierName(contractClassDeclaration.Identifier)),
                                    Identifier("DeployAsync"))
                                .AddModifiers(
                                    Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword), Token(SyntaxKind.AsyncKeyword))
                                .AddParameterListParameters(
-                                           constructorParameters)
+                                   constructorParameters)
                                .AddBodyStatements(
-                                       LocalDeclarationStatement(
-                                           VariableDeclaration(
-                                                   IdentifierName("var"))
-                                               .AddVariables(
-                                                       VariableDeclarator(
-                                                               Identifier("receipt"))
-                                                           .WithInitializer(
-                                                               EqualsValueClause(
-                                                                   AwaitExpression(
-                                                                       InvocationExpression(
-                                                                               MemberAccessExpression(
-                                                                                   SyntaxKind.SimpleMemberAccessExpression,
-                                                                                   IdentifierName(nameof(ContractBase)),
-                                                                                   IdentifierName("DeployAsync")))
-                                                                           .AddArgumentListArguments(
-                                                                               Argument(
-                                                                IdentifierName(web3Identifier)), Argument(
-                                                                IdentifierName(abiIdentifier)), Argument(
-                                                                IdentifierName(binIdentifier)), Argument(
-                                                                ArrayCreationExpression(
-                                                                        ArrayType(
-                                                                                PredefinedType(
-                                                                                    Token(SyntaxKind.ObjectKeyword)))
-                                                                            .AddRankSpecifiers(
-                                                                                    ArrayRankSpecifier()))
-                                                                    .WithInitializer(
-                                                                        InitializerExpression(
-                                                                            SyntaxKind.ArrayInitializerExpression,
-                                                                            SeparatedList<ExpressionSyntax>(
-                                                                                initializerParameters)))))))))),
-                                       ReturnStatement(
-                                           ObjectCreationExpression(
-                                                   IdentifierName(contractClassDeclaration.Identifier))
-                                               .AddArgumentListArguments(Argument(
-                                                               IdentifierName(web3Identifier)), Argument(
-                                                               MemberAccessExpression(
-                                                                   SyntaxKind.SimpleMemberAccessExpression,
-                                                                   IdentifierName("receipt"),
-                                                                   IdentifierName("ContractAddress"))))));
+                                   LocalDeclarationStatement(
+                                       VariableDeclaration(
+                                               IdentifierName("var"))
+                                           .AddVariables(
+                                               VariableDeclarator(
+                                                       Identifier("receipt"))
+                                                   .WithInitializer(
+                                                       EqualsValueClause(
+                                                           AwaitExpression(
+                                                               InvocationExpression(
+                                                                       MemberAccessExpression(
+                                                                           SyntaxKind.SimpleMemberAccessExpression,
+                                                                           IdentifierName(nameof(ContractBase)),
+                                                                           IdentifierName("DeployAsync")))
+                                                                   .AddArgumentListArguments(
+                                                                       Argument(
+                                                                           IdentifierName(web3Identifier)), Argument(
+                                                                           IdentifierName(abiIdentifier)), Argument(
+                                                                           IdentifierName(binIdentifier)), Argument(
+                                                                           ArrayCreationExpression(
+                                                                                   ArrayType(
+                                                                                           PredefinedType(
+                                                                                               Token(SyntaxKind.ObjectKeyword)))
+                                                                                       .AddRankSpecifiers(
+                                                                                           ArrayRankSpecifier()))
+                                                                               .WithInitializer(
+                                                                                   InitializerExpression(
+                                                                                       SyntaxKind.ArrayInitializerExpression,
+                                                                                       SeparatedList<ExpressionSyntax>(
+                                                                                           initializerParameters)))))))))),
+                                   ReturnStatement(
+                                       ObjectCreationExpression(
+                                               IdentifierName(contractClassDeclaration.Identifier))
+                                           .AddArgumentListArguments(Argument(
+                                                                         IdentifierName(web3Identifier)), Argument(
+                                                                         MemberAccessExpression(
+                                                                             SyntaxKind.SimpleMemberAccessExpression,
+                                                                             IdentifierName("receipt"),
+                                                                             IdentifierName("ContractAddress"))))));
                     }
 
                     if (outputParameters.Length > 0)
@@ -232,28 +236,36 @@ namespace Solidity.Roslyn
                                                               SingletonSeparatedList(
                                                                   Attribute(
                                                                       IdentifierName(nameof(FunctionOutputAttribute)))))))
-                                .AddMembers(outputParameters.Select((output, i) => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
-                                                                              .WithAttributeLists(
-                                                                                  SingletonList(
-                                                                                      AttributeList(
-                                                                                          SingletonSeparatedList(
-                                                                                              Attribute(
-                                                                                                      IdentifierName(nameof(ParameterAttribute)))
-                                                                                                  .AddArgumentListArguments(AttributeArgument(
-                                                                                                                  LiteralExpression(
-                                                                                                                      SyntaxKind.StringLiteralExpression,
-                                                                                                                      Literal(output.OriginalType))), AttributeArgument(
-                                                                                                                  LiteralExpression(
-                                                                                                                      SyntaxKind.NumericLiteralExpression,
-                                                                                                                      Literal(i + 1))))))))
-                                                                              .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                                                              .AddAccessorListAccessors(AccessorDeclaration(
-                                                                                                  SyntaxKind.GetAccessorDeclaration)
-                                                                                              .WithSemicolonToken(
-                                                                                                  Token(SyntaxKind.SemicolonToken)), AccessorDeclaration(
-                                                                                                  SyntaxKind.SetAccessorDeclaration)
-                                                                                              .WithSemicolonToken(
-                                                                                                  Token(SyntaxKind.SemicolonToken)))).Cast<MemberDeclarationSyntax>().ToArray());
+                                                  .AddMembers(outputParameters
+                                                              .Select((output, i) => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
+                                                                                     .WithAttributeLists(
+                                                                                         SingletonList(
+                                                                                             AttributeList(
+                                                                                                 SingletonSeparatedList(
+                                                                                                     Attribute(
+                                                                                                             IdentifierName(nameof(ParameterAttribute)))
+                                                                                                         .AddArgumentListArguments(AttributeArgument(
+                                                                                                                                       LiteralExpression(
+                                                                                                                                           SyntaxKind
+                                                                                                                                               .StringLiteralExpression,
+                                                                                                                                           Literal(
+                                                                                                                                               output
+                                                                                                                                                   .OriginalType))),
+                                                                                                                                   AttributeArgument(
+                                                                                                                                       LiteralExpression(
+                                                                                                                                           SyntaxKind
+                                                                                                                                               .NumericLiteralExpression,
+                                                                                                                                           Literal(i + 1))))))))
+                                                                                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                                                                                     .AddAccessorListAccessors(AccessorDeclaration(
+                                                                                                                       SyntaxKind.GetAccessorDeclaration)
+                                                                                                                   .WithSemicolonToken(
+                                                                                                                       Token(SyntaxKind.SemicolonToken)),
+                                                                                                               AccessorDeclaration(
+                                                                                                                       SyntaxKind.SetAccessorDeclaration)
+                                                                                                                   .WithSemicolonToken(
+                                                                                                                       Token(SyntaxKind.SemicolonToken))))
+                                                              .Cast<MemberDeclarationSyntax>().ToArray());
 
                             outputTypes.Add(outputTypeClass);
 
@@ -262,104 +274,104 @@ namespace Solidity.Roslyn
                         }
 
                         return MethodDeclaration(
-                                       GenericName(
-                                               Identifier("Task"))
-                                           .AddTypeArgumentListArguments(
-                                                       IdentifierName(outputType)),
-                                       Identifier(Capitalize(abi.Name) + "Async"))
-                                   .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                   .AddParameterListParameters(methodParameters)
-                                   .WithExpressionBody(
-                                       ArrowExpressionClause(
-                                           InvocationExpression(
-                                                   MemberAccessExpression(
-                                                       SyntaxKind.SimpleMemberAccessExpression,
-                                                       InvocationExpression(
-                                                               MemberAccessExpression(
-                                                                   SyntaxKind.SimpleMemberAccessExpression,
-                                                                   IdentifierName("Contract"),
-                                                                   IdentifierName("GetFunction")))
-                                                           .AddArgumentListArguments(
-                                                                       Argument(
-                                                                           LiteralExpression(
-                                                                               SyntaxKind.StringLiteralExpression,
-                                                                               Literal(abi.Name)))),
-                                                       GenericName(
-                                                               Identifier(methodName))
-                                                           .AddTypeArgumentListArguments(
-                                                                       IdentifierName(outputType))))
-                                               .AddArgumentListArguments(callParameters)))
-                                   .WithSemicolonToken(
-                                       Token(SyntaxKind.SemicolonToken));
+                                   GenericName(
+                                           Identifier("Task"))
+                                       .AddTypeArgumentListArguments(
+                                           IdentifierName(outputType)),
+                                   Identifier(Capitalize(abi.Name) + "Async"))
+                               .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                               .AddParameterListParameters(methodParameters)
+                               .WithExpressionBody(
+                                   ArrowExpressionClause(
+                                       InvocationExpression(
+                                               MemberAccessExpression(
+                                                   SyntaxKind.SimpleMemberAccessExpression,
+                                                   InvocationExpression(
+                                                           MemberAccessExpression(
+                                                               SyntaxKind.SimpleMemberAccessExpression,
+                                                               IdentifierName("Contract"),
+                                                               IdentifierName("GetFunction")))
+                                                       .AddArgumentListArguments(
+                                                           Argument(
+                                                               LiteralExpression(
+                                                                   SyntaxKind.StringLiteralExpression,
+                                                                   Literal(abi.Name)))),
+                                                   GenericName(
+                                                           Identifier(methodName))
+                                                       .AddTypeArgumentListArguments(
+                                                           IdentifierName(outputType))))
+                                           .AddArgumentListArguments(callParameters)))
+                               .WithSemicolonToken(
+                                   Token(SyntaxKind.SemicolonToken));
                     }
 
                     var sendTxCallParameters = new[]
-                    {
-                        Argument(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
+                        {
+                            Argument(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName("Web3"),
-                                        IdentifierName("TransactionManager")),
-                                    IdentifierName("Account")),
-                                IdentifierName("Address")))
-                    }.Concat(callParameters)
-                     .ToArray();
-                    
+                                        MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            IdentifierName("Web3"),
+                                            IdentifierName("TransactionManager")),
+                                        IdentifierName("Account")),
+                                    IdentifierName("Address")))
+                        }.Concat(callParameters)
+                         .ToArray();
+
                     return MethodDeclaration(
                                IdentifierName("Task"),
                                Identifier(Capitalize(abi.Name) + "Async"))
                            .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                   .AddParameterListParameters(
-                                               methodParameters)
-                                   .WithExpressionBody(
-                                       ArrowExpressionClause(
-                                           InvocationExpression(
-                                                   MemberAccessExpression(
-                                                       SyntaxKind.SimpleMemberAccessExpression,
-                                                       InvocationExpression(
-                                                               MemberAccessExpression(
-                                                                   SyntaxKind.SimpleMemberAccessExpression,
-                                                                   IdentifierName("Contract"),
-                                                                   IdentifierName("GetFunction")))
-                                                           .AddArgumentListArguments(
-                                                                       Argument(
-                                                                           LiteralExpression(
-                                                                               SyntaxKind.StringLiteralExpression,
-                                                                               Literal(abi.Name)))),
-                                                       IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
-                                               .AddArgumentListArguments(
-                                                           sendTxCallParameters)))
-                                   .WithSemicolonToken(
-                                       Token(SyntaxKind.SemicolonToken));
+                           .AddParameterListParameters(
+                               methodParameters)
+                           .WithExpressionBody(
+                               ArrowExpressionClause(
+                                   InvocationExpression(
+                                           MemberAccessExpression(
+                                               SyntaxKind.SimpleMemberAccessExpression,
+                                               InvocationExpression(
+                                                       MemberAccessExpression(
+                                                           SyntaxKind.SimpleMemberAccessExpression,
+                                                           IdentifierName("Contract"),
+                                                           IdentifierName("GetFunction")))
+                                                   .AddArgumentListArguments(
+                                                       Argument(
+                                                           LiteralExpression(
+                                                               SyntaxKind.StringLiteralExpression,
+                                                               Literal(abi.Name)))),
+                                               IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
+                                       .AddArgumentListArguments(
+                                           sendTxCallParameters)))
+                           .WithSemicolonToken(
+                               Token(SyntaxKind.SemicolonToken));
                 });
 
                 var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>().ToArray());
 
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                                            .AddUsings(UsingDirective(
-                                                       IdentifierName("System")), UsingDirective(
-                                                       QualifiedName(
-                                                           IdentifierName("System"),
-                                                           IdentifierName("Numerics"))), UsingDirective(
-                                                       QualifiedName(
-                                                           QualifiedName(
-                                                               IdentifierName("System"),
-                                                               IdentifierName("Threading")),
-                                                           IdentifierName("Tasks"))), UsingDirective(
-                                                       QualifiedName(
-                                                           QualifiedName(
-                                                               QualifiedName(
-                                                                   IdentifierName("Nethereum"),
-                                                                   IdentifierName("ABI")),
-                                                               IdentifierName("FunctionEncoding")),
-                                                           IdentifierName("Attributes"))), UsingDirective(
-                                                       QualifiedName(
-                                                           IdentifierName("Nethereum"),
-                                                           IdentifierName("Web3"))))
+                                                          IdentifierName("System")), UsingDirective(
+                                                          QualifiedName(
+                                                              IdentifierName("System"),
+                                                              IdentifierName("Numerics"))), UsingDirective(
+                                                          QualifiedName(
+                                                              QualifiedName(
+                                                                  IdentifierName("System"),
+                                                                  IdentifierName("Threading")),
+                                                              IdentifierName("Tasks"))), UsingDirective(
+                                                          QualifiedName(
+                                                              QualifiedName(
+                                                                  QualifiedName(
+                                                                      IdentifierName("Nethereum"),
+                                                                      IdentifierName("ABI")),
+                                                                  IdentifierName("FunctionEncoding")),
+                                                              IdentifierName("Attributes"))), UsingDirective(
+                                                          QualifiedName(
+                                                              IdentifierName("Nethereum"),
+                                                              IdentifierName("Web3"))))
                                            .AddMembers(classDeclarationWithMethods)
                                            .AddMembers(outputTypes.ToArray());
 
