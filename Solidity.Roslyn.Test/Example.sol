@@ -20,8 +20,8 @@ contract mortal {
         return "";
     }
 
-    function testTuple(uint16 a, int8 b) public returns (int, int) {
-        return (1,2);
+    function testTuple(uint16 a, int8 b, int64 d) public returns (int16 x, uint8 y, uint64) {
+        return (1,2,3);
     }
 }
 

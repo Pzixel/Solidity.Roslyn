@@ -128,10 +128,13 @@ namespace Solidity.Roslyn
                                                                    Block()));
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
-                
+
+                var outputTypes = new List<MemberDeclarationSyntax>();
+
                 var methods = abis.Select(abi =>
                 {
                     var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
+                    var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new { Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i}", Type = Solidity.SolidityTypesToCsTypes[output.Type] }).ToArray();
 
                     var methodParameters = inputParameters.SelectMany(input => new[]
                     {
@@ -291,9 +294,28 @@ namespace Solidity.Roslyn
                                    .WithSemicolonToken(
                                        Token(SyntaxKind.SemicolonToken));
                         }
+                        else
+                        {
+                            var outputTypeClass = ClassDeclaration(Capitalize(abi.Name) + "Output" + contract)
+                                .AddMembers(outputParameters.Select(output => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
+                                                                              .WithModifiers(
+                                                                                  TokenList(
+                                                                                      Token(SyntaxKind.PublicKeyword)))
+                                                                              .WithAccessorList(
+                                                                                  AccessorList(
+                                                                                      List(
+                                                                                          new[]{
+                                                                                              AccessorDeclaration(
+                                                                                                      SyntaxKind.GetAccessorDeclaration)
+                                                                                                  .WithSemicolonToken(
+                                                                                                      Token(SyntaxKind.SemicolonToken)),
+                                                                                              AccessorDeclaration(
+                                                                                                      SyntaxKind.SetAccessorDeclaration)
+                                                                                                  .WithSemicolonToken(
+                                                                                                      Token(SyntaxKind.SemicolonToken))})))).Cast<MemberDeclarationSyntax>().ToArray());
 
-                        var outputTypeClass = StructDeclaration(abi.Name + "Output")
-                            .AddMembers(inputParameters.Select(input => PropertyDeclaration(IdentifierName(input.Type.Name), input.Name)).Cast<MemberDeclarationSyntax>().ToArray());
+                            outputTypes.Add(outputTypeClass);
+                        }
                     }
 
                     var methodDeclarationSyntax = MethodDeclaration(
@@ -314,7 +336,8 @@ namespace Solidity.Roslyn
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                                            .WithUsings(
                                                List(
-                                                   new[]{
+                                                   new[]
+                                                   {
                                                        UsingDirective(
                                                            IdentifierName("System")),
                                                        UsingDirective(
@@ -330,8 +353,12 @@ namespace Solidity.Roslyn
                                                        UsingDirective(
                                                            QualifiedName(
                                                                IdentifierName("Nethereum"),
-                                                               IdentifierName("Web3")))}))
-                    .AddMembers(classDeclarationWithMethods);
+                                                               IdentifierName("Web3")))
+                                                   }))
+                                           .AddMembers(classDeclarationWithMethods)
+                                           .AddMembers(outputTypes.ToArray());
+
+                outputTypes.Clear();
 
                 return namespaceDeclaration;
             });
