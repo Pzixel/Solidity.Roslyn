@@ -62,6 +62,7 @@ namespace Solidity.Roslyn
                 var web3Identifier = Identifier("web3");
 
                 var contractClassDeclaration = ClassDeclaration(contract)
+                                               .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddMembers(
                         FieldDeclaration(
                                 VariableDeclaration(
@@ -261,6 +262,7 @@ namespace Solidity.Roslyn
                         else
                         {
                             var outputTypeClass = ClassDeclaration(contract + Capitalize(abi.Name) + "Output")
+                                                  .AddModifiers(Token(SyntaxKind.PublicKeyword))
                                                   .WithAttributeLists(
                                                       SingletonList(
                                                           AttributeList(
@@ -287,9 +289,7 @@ namespace Solidity.Roslyn
                                                                                                                       LiteralExpression(
                                                                                                                           SyntaxKind.NumericLiteralExpression,
                                                                                                                           Literal(i + 1)))})))))))
-                                                                              .WithModifiers(
-                                                                                  TokenList(
-                                                                                      Token(SyntaxKind.PublicKeyword)))
+                                                                              .AddModifiers(Token(SyntaxKind.PublicKeyword))
                                                                               .WithAccessorList(
                                                                                   AccessorList(
                                                                                       List(
