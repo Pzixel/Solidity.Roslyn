@@ -3,6 +3,10 @@ skip_non_tags: true
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
+install:
+  - Invoke-WebRequest https://github.com/ethereum/solidity/releases/download/v0.4.24/solidity-windows.zip -OutFile C:\solidity\solc.zip
+  - 7z e C:\solidity\solc.zip
+  - SET PATH=C:\solidity;%PATH%
 before_build:
 - ps: nuget restore
 build:

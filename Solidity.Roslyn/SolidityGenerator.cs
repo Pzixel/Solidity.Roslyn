@@ -25,6 +25,28 @@ namespace Solidity.Roslyn
 
         public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
         {
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "solc",
+                        Arguments = "--version",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                try
+                {
+                    process.Start();
+                }
+                catch
+                {
+                    throw new InvalidOperationException("System doesn't have solc available in PATH.");
+                }
+            }
+
             var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories);
 
             var jsons = solidityFiles.Select(file =>
