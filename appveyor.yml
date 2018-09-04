@@ -1,10 +1,18 @@
 version: 0.1.{build}
-skip_non_tags: true
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
+skip_commits:
+  files:
+    - .gitattributes
+    - .gitignore
+    - LICENSE
+    - '*.md'
+branches:
+  only:
+    - master
 install:
-  - appveyor DownloadFile https://github.com/ethereum/solidity/releases/download/v0.4.24/solidity-windows.zip -FileName C:\solidity\solc.zip
+  - ps: Invoke-WebRequest https://github.com/ethereum/solidity/releases/download/v0.4.24/solidity-windows.zip -OutFile C:\solidity\solc.zip
   - 7z e C:\solidity\solc.zip
   - SET PATH=C:\solidity;%PATH%
 before_build:
