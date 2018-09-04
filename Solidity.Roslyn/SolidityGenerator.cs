@@ -246,11 +246,11 @@ namespace Solidity.Roslyn
                                                            }))))));
                     }
 
-                    if (abi.Outputs.Length > 0)
+                    if (outputParameters.Length > 0)
                     {
-                        if (abi.Outputs.Length == 1)
+                        if (outputParameters.Length == 1)
                         {
-                            string outputType = Solidity.SolidityTypesToCsTypes[abi.Outputs.Single().Type].Name;
+                            string outputType = outputParameters.Single().Type.Name;
                             return MethodDeclaration(
                                        GenericName(
                                                Identifier("Task"))
@@ -358,8 +358,6 @@ namespace Solidity.Roslyn
                                            .AddMembers(classDeclarationWithMethods)
                                            .AddMembers(outputTypes.ToArray());
 
-                outputTypes.Clear();
-
                 return namespaceDeclaration;
             });
 
@@ -367,38 +365,5 @@ namespace Solidity.Roslyn
         }
 
         private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
-    }
-
-    public class SolcOutput
-    {
-        public string Version { get; set; }
-        public Dictionary<string, Contract> Contracts { get; set; }
-    }
-
-    public class Contract
-    {
-        public string Abi { get; set; }
-        public string Bin { get; set; }
-    }
-
-    public class Abi
-    {
-        public string Name { get; set; }
-        public MemberType Type { get; set; }
-        public Parameter[] Inputs { get; set; }
-        public Parameter[] Outputs { get; set; }
-    }
-
-    public enum MemberType
-    {
-        Function,
-        Constructor
-    }
-
-    public class Parameter
-    {
-        public string Name { get; set; }
-
-        public string Type { get; set; }
     }
 }
