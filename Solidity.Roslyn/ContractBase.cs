@@ -20,7 +20,7 @@ namespace Solidity.Roslyn
 
             if (IsEmptyAddress(address))
             {
-                throw new ArgumentException($"Adress '{address}' is empty");
+                throw new ArgumentException($"Address '{address}' is empty");
             }
 
             Web3 = web3 ?? throw new ArgumentNullException(nameof(web3));
