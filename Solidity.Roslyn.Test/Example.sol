@@ -16,6 +16,9 @@ contract mortal {
         }
     }
 
+    function testTx(int a, uint b) public {
+    }
+
     function testValue(int a) public returns (string) {
         return "";
     }

@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts;
 using Nethereum.Web3;
 using Newtonsoft.Json;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -249,10 +250,66 @@ namespace Solidity.Roslyn
 
                     if (outputParameters.Length > 0)
                     {
+                        SyntaxToken outputType;
+                        string methodName;
+
                         if (outputParameters.Length == 1)
                         {
-                            string outputType = outputParameters.Single().Type.Name;
-                            return MethodDeclaration(
+                            outputType = Identifier(outputParameters.Single().Type.Name);
+                            methodName = nameof(Function.CallAsync);
+                        }
+                        else
+                        {
+                            var outputTypeClass = ClassDeclaration(contract + Capitalize(abi.Name) + "Output")
+                                                  .WithAttributeLists(
+                                                      SingletonList(
+                                                          AttributeList(
+                                                              SingletonSeparatedList(
+                                                                  Attribute(
+                                                                      IdentifierName(nameof(FunctionOutputAttribute)))))))
+                                .AddMembers(outputParameters.Select((output, i) => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
+                                                                              .WithAttributeLists(
+                                                                                  SingletonList(
+                                                                                      AttributeList(
+                                                                                          SingletonSeparatedList(
+                                                                                              Attribute(
+                                                                                                      IdentifierName(nameof(ParameterAttribute)))
+                                                                                                  .WithArgumentList(
+                                                                                                      AttributeArgumentList(
+                                                                                                          SeparatedList<AttributeArgumentSyntax>(
+                                                                                                              new SyntaxNodeOrToken[]{
+                                                                                                                  AttributeArgument(
+                                                                                                                      LiteralExpression(
+                                                                                                                          SyntaxKind.StringLiteralExpression,
+                                                                                                                          Literal(output.OriginalType))),
+                                                                                                                  Token(SyntaxKind.CommaToken),
+                                                                                                                  AttributeArgument(
+                                                                                                                      LiteralExpression(
+                                                                                                                          SyntaxKind.NumericLiteralExpression,
+                                                                                                                          Literal(i + 1)))})))))))
+                                                                              .WithModifiers(
+                                                                                  TokenList(
+                                                                                      Token(SyntaxKind.PublicKeyword)))
+                                                                              .WithAccessorList(
+                                                                                  AccessorList(
+                                                                                      List(
+                                                                                          new[]{
+                                                                                              AccessorDeclaration(
+                                                                                                      SyntaxKind.GetAccessorDeclaration)
+                                                                                                  .WithSemicolonToken(
+                                                                                                      Token(SyntaxKind.SemicolonToken)),
+                                                                                              AccessorDeclaration(
+                                                                                                      SyntaxKind.SetAccessorDeclaration)
+                                                                                                  .WithSemicolonToken(
+                                                                                                      Token(SyntaxKind.SemicolonToken))})))).Cast<MemberDeclarationSyntax>().ToArray());
+
+                            outputTypes.Add(outputTypeClass);
+
+                            outputType = outputTypeClass.Identifier;
+                            methodName = nameof(Function.CallDeserializingToObjectAsync);
+                        }
+
+                        return MethodDeclaration(
                                        GenericName(
                                                Identifier("Task"))
                                            .WithTypeArgumentList(
@@ -283,7 +340,7 @@ namespace Solidity.Roslyn
                                                                                SyntaxKind.StringLiteralExpression,
                                                                                Literal(abi.Name)))))),
                                                        GenericName(
-                                                               Identifier("CallAsync"))
+                                                               Identifier(methodName))
                                                            .WithTypeArgumentList(
                                                                TypeArgumentList(
                                                                    SingletonSeparatedList<TypeSyntax>(
@@ -294,65 +351,61 @@ namespace Solidity.Roslyn
                                                            callParameters)))))
                                    .WithSemicolonToken(
                                        Token(SyntaxKind.SemicolonToken));
-                        }
-
-                        var outputTypeClass = ClassDeclaration(contract + Capitalize(abi.Name) + "Output")
-                                              .WithAttributeLists(
-                                                  SingletonList(
-                                                      AttributeList(
-                                                          SingletonSeparatedList(
-                                                              Attribute(
-                                                                  IdentifierName(nameof(FunctionOutputAttribute)))))))
-                            .AddMembers(outputParameters.Select((output, i) => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
-                                                                          .WithAttributeLists(
-                                                                              SingletonList(
-                                                                                  AttributeList(
-                                                                                      SingletonSeparatedList(
-                                                                                          Attribute(
-                                                                                                  IdentifierName(nameof(ParameterAttribute)))
-                                                                                              .WithArgumentList(
-                                                                                                  AttributeArgumentList(
-                                                                                                      SeparatedList<AttributeArgumentSyntax>(
-                                                                                                          new SyntaxNodeOrToken[]{
-                                                                                                              AttributeArgument(
-                                                                                                                  LiteralExpression(
-                                                                                                                      SyntaxKind.StringLiteralExpression,
-                                                                                                                      Literal(output.OriginalType))),
-                                                                                                              Token(SyntaxKind.CommaToken),
-                                                                                                              AttributeArgument(
-                                                                                                                  LiteralExpression(
-                                                                                                                      SyntaxKind.NumericLiteralExpression,
-                                                                                                                      Literal(i + 1)))})))))))
-                                                                          .WithModifiers(
-                                                                              TokenList(
-                                                                                  Token(SyntaxKind.PublicKeyword)))
-                                                                          .WithAccessorList(
-                                                                              AccessorList(
-                                                                                  List(
-                                                                                      new[]{
-                                                                                          AccessorDeclaration(
-                                                                                                  SyntaxKind.GetAccessorDeclaration)
-                                                                                              .WithSemicolonToken(
-                                                                                                  Token(SyntaxKind.SemicolonToken)),
-                                                                                          AccessorDeclaration(
-                                                                                                  SyntaxKind.SetAccessorDeclaration)
-                                                                                              .WithSemicolonToken(
-                                                                                                  Token(SyntaxKind.SemicolonToken))})))).Cast<MemberDeclarationSyntax>().ToArray());
-
-                        outputTypes.Add(outputTypeClass);
                     }
 
-                    var methodDeclarationSyntax = MethodDeclaration(
-                                                      IdentifierName("Task"),
-                                                      Identifier(Capitalize(abi.Name) + "Async"))
-                                                  .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                                  .WithExpressionBody(
-                                                      ArrowExpressionClause(
-                                                          LiteralExpression(
-                                                              SyntaxKind.NullLiteralExpression)))
-                                                  .WithSemicolonToken(
-                                                      Token(SyntaxKind.SemicolonToken));
-                    return methodDeclarationSyntax;
+                    var sendTxCallParameters = new SyntaxNodeOrToken[]
+                    {
+                        Argument(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName("Web3"),
+                                        IdentifierName("TransactionManager")),
+                                    IdentifierName("Account")),
+                                IdentifierName("Address")))
+                    };
+
+                    if (callParameters.Length > 0)
+                    {
+                        sendTxCallParameters = sendTxCallParameters.Concat(new SyntaxNodeOrToken[] { Token(SyntaxKind.CommaToken) }).Concat(callParameters)
+                                                                   .ToArray();
+                    }
+
+                    return MethodDeclaration(
+                               IdentifierName("Task"),
+                               Identifier(Capitalize(abi.Name) + "Async"))
+                           .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                                   .WithParameterList(
+                                       ParameterList(
+                                           SeparatedList<ParameterSyntax>(
+                                               methodParameters)))
+                                   .WithExpressionBody(
+                                       ArrowExpressionClause(
+                                           InvocationExpression(
+                                                   MemberAccessExpression(
+                                                       SyntaxKind.SimpleMemberAccessExpression,
+                                                       InvocationExpression(
+                                                               MemberAccessExpression(
+                                                                   SyntaxKind.SimpleMemberAccessExpression,
+                                                                   IdentifierName("Contract"),
+                                                                   IdentifierName("GetFunction")))
+                                                           .WithArgumentList(
+                                                               ArgumentList(
+                                                                   SingletonSeparatedList(
+                                                                       Argument(
+                                                                           LiteralExpression(
+                                                                               SyntaxKind.StringLiteralExpression,
+                                                                               Literal(abi.Name)))))),
+                                                       IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
+                                               .WithArgumentList(
+                                                   ArgumentList(
+                                                       SeparatedList<ArgumentSyntax>(
+                                                           sendTxCallParameters)))))
+                                   .WithSemicolonToken(
+                                       Token(SyntaxKind.SemicolonToken));
                 });
 
                 var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>().ToArray());
