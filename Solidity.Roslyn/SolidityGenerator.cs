@@ -291,6 +291,9 @@ namespace Solidity.Roslyn
                                    .WithSemicolonToken(
                                        Token(SyntaxKind.SemicolonToken));
                         }
+
+                        var outputTypeClass = StructDeclaration(abi.Name + "Output")
+                            .AddMembers(inputParameters.Select(input => PropertyDeclaration(IdentifierName(input.Type.Name), input.Name)).Cast<MemberDeclarationSyntax>().ToArray());
                     }
 
                     var methodDeclarationSyntax = MethodDeclaration(
