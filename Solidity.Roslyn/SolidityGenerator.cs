@@ -135,7 +135,7 @@ namespace Solidity.Roslyn
                 var methods = abis.Select(abi =>
                 {
                     var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
-                    var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new { Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i}", Type = Solidity.SolidityTypesToCsTypes[output.Type], OriginalType = output.Type }).ToArray();
+                    var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new { Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i + 1}", Type = Solidity.SolidityTypesToCsTypes[output.Type], OriginalType = output.Type }).ToArray();
 
                     var methodParameters = inputParameters.SelectMany(input => new[]
                     {
@@ -322,7 +322,7 @@ namespace Solidity.Roslyn
                                                                                                               AttributeArgument(
                                                                                                                   LiteralExpression(
                                                                                                                       SyntaxKind.NumericLiteralExpression,
-                                                                                                                      Literal(i)))})))))))
+                                                                                                                      Literal(i + 1)))})))))))
                                                                           .WithModifiers(
                                                                               TokenList(
                                                                                   Token(SyntaxKind.PublicKeyword)))
