@@ -1,1 +1,1 @@
-[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\Solidity", "Machine")
+[Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\Solidity", [EnvironmentVariableTarget]::Machine)
