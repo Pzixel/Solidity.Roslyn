@@ -129,10 +129,10 @@ namespace Solidity.Roslyn
 
                 var methods = abis.Select(abi =>
                 {
-                    var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.SolidityTypesToCsTypes[input.Type] }).ToArray();
+                    var inputParameters = abi.Inputs.Select(input => new { input.Name, Type = Solidity.GetCsType(input.Type) }).ToArray();
                     var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output, i) => new
                     {
-                        Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i + 1}", Type = Solidity.SolidityTypesToCsTypes[output.Type],
+                       Name = !string.IsNullOrEmpty(output.Name) ? output.Name : $"Property{i + 1}", Type = Solidity.GetCsType(output.Type),
                         OriginalType = output.Type
                     }).ToArray();
 
@@ -141,7 +141,7 @@ namespace Solidity.Roslyn
                         Parameter(
                                 Identifier(input.Name))
                             .WithType(
-                                IdentifierName(input.Type.Name))
+                                IdentifierName(input.Type))
                     }).ToArray();
 
                     var initializerParameters = inputParameters.SelectMany(input => new[]
@@ -223,7 +223,7 @@ namespace Solidity.Roslyn
 
                         if (outputParameters.Length == 1)
                         {
-                            outputType = Identifier(outputParameters.Single().Type.Name);
+                            outputType = Identifier(outputParameters.Single().Type);
                             methodName = nameof(Function.CallAsync);
                         }
                         else
@@ -237,7 +237,7 @@ namespace Solidity.Roslyn
                                                                   Attribute(
                                                                       IdentifierName(nameof(FunctionOutputAttribute)))))))
                                                   .AddMembers(outputParameters
-                                                              .Select((output, i) => PropertyDeclaration(IdentifierName(output.Type.Name), output.Name)
+                                                              .Select((output, i) => PropertyDeclaration(IdentifierName(output.Type), output.Name)
                                                                                      .WithAttributeLists(
                                                                                          SingletonList(
                                                                                              AttributeList(

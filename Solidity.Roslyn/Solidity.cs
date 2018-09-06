@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
+using Nethereum.Generators.Core;
 
 namespace Solidity.Roslyn
 {
     internal static class Solidity
     {
-        public static ImmutableDictionary<string, Type> SolidityTypesToCsTypes { get; } = new Dictionary<string, Type>
+        private static ImmutableDictionary<string, Type> SolidityTypesToCsTypes { get; } = new Dictionary<string, Type>
         {
             ["bool"] = typeof(bool),
             ["int8"] = typeof(sbyte),
@@ -59,5 +60,17 @@ namespace Solidity.Roslyn
             ["bytes"] = typeof(byte[]),
             ["string"] = typeof(string)
         }.ToImmutableDictionary();
+
+        public static string GetCsType(string solidityType)
+        {
+            try
+            {
+                return new ABITypeToCSharpType().Convert(solidityType) ;
+            }
+            catch
+            {
+                throw new KeyNotFoundException($"Key {solidityType} was not found!");
+            }
+        }
     }
 }

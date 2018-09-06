@@ -5,6 +5,9 @@
   <ItemGroup>
     <PackageReference Include="CodeGeneration.Roslyn" Version="0.4.65" />
     <PackageReference Include="Nethereum.ABI" Version="2.5.1" />
+    <PackageReference Include="Nethereum.Generators" Version="1.0.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Nethereum.Web3" Version="2.5.1" />
   </ItemGroup>
 </Project>

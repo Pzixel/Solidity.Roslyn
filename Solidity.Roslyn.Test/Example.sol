@@ -1,36 +1,47 @@
 pragma solidity ^0.4.24;
 
-contract mortal {
+contract baseContract {
     /* Define variable owner of the type address */
-    address owner;
+    address public owner;
+    uint64 public a;
+    uint64 public b;
 
     /* This function is executed at initialization and sets the owner of the contract */
-    function mortal(uint64 a, uint b) public {
+    function mortal(uint64 a_, uint64 b_) public {
         owner = msg.sender;
+        a = a_;
+        b = b_;
     }
 
     /* Function to recover the funds on the contract */
-    function kill() public {
-        if (msg.sender == owner) {
-            selfdestruct(owner);
-        }
+    function noParams() public {
     }
 
-    function testTx(int a, uint b) public {
+    function throwIfNotEqual(int a, int b) public {
+        require (a == b);
     }
 
-    function testValue(int a) public returns (string) {
-        return "";
+    function testSimpleValue(int a) public returns (int) {
+        return a;
     }
 
-    function testTuple(uint16 a, int8 b, int64 d) public returns (int16 x, uint8 y, uint64) {
+    function testTuplePartialNames(uint16 a, int8 b, int64 d) public returns (int16 x, uint8 y, uint64) {
         return (1,2,3);
+    }
+
+    function receiveMultiple(uint64[] xs, bytes32[] ys) public pure {
+        require (xs.length > 0);
+        require (ys.length > 0);
+    }
+
+    function returnMultiple() public pure returns (uint64[], bytes) {
+        return (new uint64[](1), new bytes(3));
     }
 }
 
-contract greeter is mortal {
+contract derivedContract is baseContract {
     /* Define variable greeting of the type string */
-    string greeting;
+    string public greeting;
 
     /* This runs when the contract is executed */
     function greeter(string _greeting) public {
@@ -38,7 +49,7 @@ contract greeter is mortal {
     }
 
     /* Main function */
-    function greet() public constant returns (string) {
+    function greet() public view returns (string) {
         return greeting;
     }
 }
