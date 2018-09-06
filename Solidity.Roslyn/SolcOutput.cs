@@ -25,7 +25,8 @@ namespace Solidity.Roslyn
     public enum MemberType
     {
         Function,
-        Constructor
+        Constructor,
+        Event
     }
 
     public class Parameter
