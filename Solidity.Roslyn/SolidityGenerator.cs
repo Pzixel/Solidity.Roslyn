@@ -176,7 +176,7 @@ namespace Solidity.Roslyn
                     switch (abi.Type)
                     {
                         case MemberType.Constructor:
-                            return GetConstructodDeclaration(web3Identifier,
+                            return GetConstructorDeclaration(web3Identifier,
                                                              methodParameters,
                                                              contractClassDeclaration,
                                                              abiIdentifier,
@@ -483,7 +483,7 @@ namespace Solidity.Roslyn
             return methodDeclarationSyntax;
         }
 
-        private static MethodDeclarationSyntax GetConstructodDeclaration(SyntaxToken web3Identifier,
+        private static MethodDeclarationSyntax GetConstructorDeclaration(SyntaxToken web3Identifier,
                                                                          ParameterSyntax[] methodParameters,
                                                                          ClassDeclarationSyntax contractClassDeclaration,
                                                                          SyntaxToken abiIdentifier,
