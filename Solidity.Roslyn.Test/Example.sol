@@ -1,19 +1,16 @@
 pragma solidity ^0.4.24;
 
 contract baseContract {
-    /* Define variable owner of the type address */
     address public owner;
     uint64 public x;
     uint64 public y;
 
-    /* This function is executed at initialization and sets the owner of the contract */
-    function mortal(uint64 x_, uint64 y_) public {
+    constructor(uint64 x_, uint64 y_) public {
         owner = msg.sender;
         x = x_;
         y = y_;
     }
 
-    /* Function to recover the funds on the contract */
     function noParams() public pure {
     }
 
@@ -44,7 +41,7 @@ contract derivedContract is baseContract {
     string public greeting;
     event Greet(uint indexed greetId, string text);
 
-    function greeter(string _greeting) public {
+    constructor(string _greeting) public {
         greeting = _greeting;
     }
 

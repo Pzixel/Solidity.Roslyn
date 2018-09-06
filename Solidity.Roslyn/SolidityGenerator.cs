@@ -14,6 +14,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
 using Nethereum.Generators.Core;
+using Nethereum.RPC.Accounts;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.RPC.TransactionManagers;
 using Nethereum.Web3;
 using Newtonsoft.Json;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -66,8 +69,11 @@ namespace Solidity.Roslyn
                 var abiIdentifier = Identifier("Abi");
                 var binIdentifier = Identifier("Bin");
                 var web3Identifier = Identifier("web3");
+                var contractProperty = Identifier("Contract");
+                var addressIdentifier = Identifier("address");
 
                 var classIdentifier = Identifier(contract);
+
                 var contractClassDeclaration = ClassDeclaration(classIdentifier)
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddMembers(
@@ -104,7 +110,7 @@ namespace Solidity.Roslyn
                                     .WithType(
                                         IdentifierName(nameof(Web3))),
                                 Parameter(
-                                        Identifier("address"))
+                                        addressIdentifier)
                                     .WithType(
                                         PredefinedType(
                                             Token(SyntaxKind.StringKeyword))))
@@ -120,7 +126,7 @@ namespace Solidity.Roslyn
                                                 Argument(
                                                     IdentifierName(abiIdentifier)),
                                                 Argument(
-                                                    IdentifierName("address"))
+                                                    IdentifierName(addressIdentifier))
                                             }))))
                             .WithBody(
                                 Block()))
@@ -188,17 +194,20 @@ namespace Solidity.Roslyn
                                                                       abi,
                                                                       outputTypes,
                                                                       methodParameters,
-                                                                      callParameters);
+                                                                      callParameters,
+                                                                      contractProperty);
                             }
 
                             return GetSendTxMethodDeclarationSyntax(callParameters,
                                                                     abi,
-                                                                    methodParameters);
+                                                                    methodParameters,
+                                                                    contractProperty);
                         case MemberType.Event:
                             return GetEventMethodDeclarationSyntax(inputParameters,
                                                                    contract,
                                                                    abi,
-                                                                   outputTypes);
+                                                                   outputTypes,
+                                                                   contractProperty);
                         default:
                             throw new InvalidEnumArgumentException(nameof(abi.Type),
                                                                    (int) abi.Type,
@@ -254,7 +263,8 @@ namespace Solidity.Roslyn
         private static MethodDeclarationSyntax GetEventMethodDeclarationSyntax(ParameterDescription[] inputParameters,
                                                                                string contract,
                                                                                Abi abi,
-                                                                               List<MemberDeclarationSyntax> outputTypes)
+                                                                               List<MemberDeclarationSyntax> outputTypes,
+                                                                               SyntaxToken contractProperty)
         {
             var members = inputParameters
                 .Select((output,
@@ -321,7 +331,7 @@ namespace Solidity.Roslyn
                         InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("Contract"),
+                                    IdentifierName(contractProperty),
                                     IdentifierName(nameof(Nethereum.Contracts.Contract.GetEvent))))
                             .WithArgumentList(
                                 ArgumentList(
@@ -336,7 +346,8 @@ namespace Solidity.Roslyn
 
         private static MethodDeclarationSyntax GetSendTxMethodDeclarationSyntax(ArgumentSyntax[] callParameters,
                                                                                 Abi abi,
-                                                                                ParameterSyntax[] methodParameters)
+                                                                                ParameterSyntax[] methodParameters,
+                                                                                SyntaxToken contractProperty)
         {
             var sendTxCallParameters = new[]
                 {
@@ -348,14 +359,14 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName("Web3"),
-                                    IdentifierName("TransactionManager")),
-                                IdentifierName("Account")),
-                            IdentifierName("Address")))
+                                    IdentifierName(nameof(Web3.TransactionManager))),
+                                IdentifierName(nameof(ITransactionManager.Account))),
+                            IdentifierName(nameof(IAccount.Address))))
                 }.Concat(callParameters)
                 .ToArray();
 
             return MethodDeclaration(
-                    IdentifierName("Task"),
+                    IdentifierName(nameof(Task)),
                     Identifier(Capitalize(abi.Name) + "Async"))
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
@@ -368,8 +379,8 @@ namespace Solidity.Roslyn
                                     InvocationExpression(
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName("Contract"),
-                                                IdentifierName("GetFunction")))
+                                                IdentifierName(contractProperty),
+                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
@@ -387,7 +398,8 @@ namespace Solidity.Roslyn
                                                                               Abi abi,
                                                                               List<MemberDeclarationSyntax> outputTypes,
                                                                               ParameterSyntax[] methodParameters,
-                                                                              ArgumentSyntax[] callParameters)
+                                                                              ArgumentSyntax[] callParameters,
+                                                                              SyntaxToken contractProperty)
         {
             SyntaxToken outputType;
             string methodName;
@@ -450,7 +462,7 @@ namespace Solidity.Roslyn
 
             var methodDeclarationSyntax = MethodDeclaration(
                     GenericName(
-                            Identifier("Task"))
+                            Identifier(nameof(Task)))
                         .AddTypeArgumentListArguments(
                             IdentifierName(outputType)),
                     Identifier(Capitalize(abi.Name) + "Async"))
@@ -464,8 +476,8 @@ namespace Solidity.Roslyn
                                     InvocationExpression(
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName("Contract"),
-                                                IdentifierName("GetFunction")))
+                                                IdentifierName(contractProperty),
+                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
@@ -497,9 +509,10 @@ namespace Solidity.Roslyn
                 }.Concat(methodParameters)
                 .ToArray();
 
+            var syntaxToken = Identifier("receipt");
             return MethodDeclaration(
                     GenericName(
-                            Identifier("Task"))
+                            Identifier(nameof(Task)))
                         .AddTypeArgumentListArguments(
                             IdentifierName(contractClassDeclaration.Identifier)),
                     Identifier("DeployAsync"))
@@ -515,7 +528,7 @@ namespace Solidity.Roslyn
                                 IdentifierName("var"))
                             .AddVariables(
                                 VariableDeclarator(
-                                        Identifier("receipt"))
+                                        syntaxToken)
                                     .WithInitializer(
                                         EqualsValueClause(
                                             AwaitExpression(
@@ -551,8 +564,8 @@ namespace Solidity.Roslyn
                                                       Argument(
                                                           MemberAccessExpression(
                                                               SyntaxKind.SimpleMemberAccessExpression,
-                                                              IdentifierName("receipt"),
-                                                              IdentifierName("ContractAddress"))))));
+                                                              IdentifierName(syntaxToken),
+                                                              IdentifierName(nameof(TransactionReceipt.ContractAddress)))))));
         }
 
         private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
