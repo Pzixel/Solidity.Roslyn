@@ -22,8 +22,7 @@ namespace Solidity.Roslyn
 {
     public class SolidityGenerator : ICodeGenerator
     {
-        [SuppressMessage("ReSharper",
-            "UnusedParameter.Local")]
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
         public SolidityGenerator(AttributeData attributeData)
         {
         }
@@ -70,7 +69,8 @@ namespace Solidity.Roslyn
                 var binIdentifier = Identifier("Bin");
                 var web3Identifier = Identifier("web3");
 
-                var contractClassDeclaration = ClassDeclaration(contract)
+                var classIdentifier = Identifier(contract);
+                var contractClassDeclaration = ClassDeclaration(classIdentifier)
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddMembers(
                         FieldDeclaration(
@@ -96,42 +96,39 @@ namespace Solidity.Roslyn
                                                         SyntaxKind.StringLiteralExpression,
                                                         Literal(x.Value.Bin))))))
                             .AddModifiers(Token(SyntaxKind.PublicKeyword),
-                                          Token(SyntaxKind.ConstKeyword)))
+                                          Token(SyntaxKind.ConstKeyword)),
+                        ConstructorDeclaration(classIdentifier)
+                            .AddModifiers(
+                                Token(SyntaxKind.PublicKeyword))
+                            .AddParameterListParameters(
+                                Parameter(
+                                        web3Identifier)
+                                    .WithType(
+                                        IdentifierName(nameof(Web3))),
+                                Parameter(
+                                        Identifier("address"))
+                                    .WithType(
+                                        PredefinedType(
+                                            Token(SyntaxKind.StringKeyword))))
+                            .WithInitializer(
+                                ConstructorInitializer(
+                                    SyntaxKind.BaseConstructorInitializer,
+                                    ArgumentList(
+                                        SeparatedList(
+                                            new[]
+                                            {
+                                                Argument(
+                                                    IdentifierName(web3Identifier)),
+                                                Argument(
+                                                    IdentifierName(abiIdentifier)),
+                                                Argument(
+                                                    IdentifierName("address"))
+                                            }))))
+                            .WithBody(
+                                Block()))
                     .AddBaseListTypes(
                         SimpleBaseType(
                             IdentifierName(nameof(ContractBase))));
-
-                contractClassDeclaration = contractClassDeclaration
-                    .AddMembers(ConstructorDeclaration(
-                                        contractClassDeclaration.Identifier)
-                                    .AddModifiers(
-                                        Token(SyntaxKind.PublicKeyword))
-                                    .AddParameterListParameters(
-                                        Parameter(
-                                                web3Identifier)
-                                            .WithType(
-                                                IdentifierName(nameof(Web3))),
-                                        Parameter(
-                                                Identifier("address"))
-                                            .WithType(
-                                                PredefinedType(
-                                                    Token(SyntaxKind.StringKeyword))))
-                                    .WithInitializer(
-                                        ConstructorInitializer(
-                                            SyntaxKind.BaseConstructorInitializer,
-                                            ArgumentList(
-                                                SeparatedList(
-                                                    new[]
-                                                    {
-                                                        Argument(
-                                                            IdentifierName(web3Identifier)),
-                                                        Argument(
-                                                            IdentifierName(abiIdentifier)),
-                                                        Argument(
-                                                            IdentifierName("address"))
-                                                    }))))
-                                    .WithBody(
-                                        Block()));
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
 
@@ -139,10 +136,20 @@ namespace Solidity.Roslyn
 
                 var methods = abis.Select(abi =>
                 {
-                    var inputParameters = abi.Inputs.Select((input, i) => new ParameterDescription(input.Name, typeConverter.Convert(input.Type), input.Type, $"parameter{i + 1}", input.Indexed))
+                    var inputParameters = abi.Inputs.Select((input,
+                                                             i) => new ParameterDescription(input.Name,
+                                                                                            typeConverter.Convert(input.Type),
+                                                                                            input.Type,
+                                                                                            $"parameter{i + 1}",
+                                                                                            input.Indexed))
                         .ToArray();
                     var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output,
-                                                                                             i) => new ParameterDescription(output.Name, typeConverter.Convert(output.Type, true), output.Type, $"Property{i + 1}", output.Indexed))
+                                                                                             i) => new ParameterDescription(output.Name,
+                                                                                                                            typeConverter.Convert(output.Type,
+                                                                                                                                                  true),
+                                                                                                                            output.Type,
+                                                                                                                            $"Property{i + 1}",
+                                                                                                                            output.Indexed))
                         .ToArray();
 
                     var methodParameters = inputParameters.SelectMany(input => new[]
@@ -330,8 +337,8 @@ namespace Solidity.Roslyn
         }
 
         private static MethodDeclarationSyntax GetSendTxMethodDeclarationSyntax(ArgumentSyntax[] callParameters,
-                                                                            Abi abi,
-                                                                            ParameterSyntax[] methodParameters)
+                                                                                Abi abi,
+                                                                                ParameterSyntax[] methodParameters)
         {
             var sendTxCallParameters = new[]
                 {
@@ -559,7 +566,11 @@ namespace Solidity.Roslyn
             public string OriginalType { get; }
             public bool Indexed { get; }
 
-            public ParameterDescription(string name, string type, string originalType, string missingReplacement, bool indexed) : this()
+            public ParameterDescription(string name,
+                                        string type,
+                                        string originalType,
+                                        string missingReplacement,
+                                        bool indexed) : this()
             {
                 Name = !string.IsNullOrEmpty(name)
                            ? name
