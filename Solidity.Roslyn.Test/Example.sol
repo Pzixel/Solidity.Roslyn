@@ -34,21 +34,18 @@ contract baseContract {
         require (ys.length > 0);
     }
 
-    function returnMultiple() public pure returns (uint64[], bytes) {
-        return (new uint64[](1), new bytes(3));
+    function returnMultiple() public pure returns (uint64[], bytes32[]) {
+        return (new uint64[](1), new bytes32[](3));
     }
 }
 
 contract derivedContract is baseContract {
-    /* Define variable greeting of the type string */
     string public greeting;
 
-    /* This runs when the contract is executed */
     function greeter(string _greeting) public {
         greeting = _greeting;
     }
 
-    /* Main function */
     function greet() public view returns (string) {
         return greeting;
     }
