@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -138,10 +139,10 @@ namespace Solidity.Roslyn
 
                 var methods = abis.Select(abi =>
                 {
-                    var inputParameters = abi.Inputs.Select((input, i) => new ParameterDescription(input.Name, typeConverter.Convert(input.Type), input.Type, $"parameter{i + 1}"))
+                    var inputParameters = abi.Inputs.Select((input, i) => new ParameterDescription(input.Name, typeConverter.Convert(input.Type), input.Type, $"parameter{i + 1}", input.Indexed))
                         .ToArray();
                     var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output,
-                                                                                             i) => new ParameterDescription(output.Name, typeConverter.Convert(output.Type, true), output.Type, $"Property{i + 1}"))
+                                                                                             i) => new ParameterDescription(output.Name, typeConverter.Convert(output.Type, true), output.Type, $"Property{i + 1}", output.Indexed))
                         .ToArray();
 
                     var methodParameters = inputParameters.SelectMany(input => new[]
@@ -165,152 +166,39 @@ namespace Solidity.Roslyn
                         })
                         .ToArray();
 
-                    if (abi.Type == MemberType.Constructor)
+                    switch (abi.Type)
                     {
-                        return GetConstructodDeclaration(web3Identifier,
-                                                         methodParameters,
-                                                         contractClassDeclaration,
-                                                         abiIdentifier,
-                                                         binIdentifier,
-                                                         initializerParameters);
+                        case MemberType.Constructor:
+                            return GetConstructodDeclaration(web3Identifier,
+                                                             methodParameters,
+                                                             contractClassDeclaration,
+                                                             abiIdentifier,
+                                                             binIdentifier,
+                                                             initializerParameters);
+                        case MemberType.Function:
+                            if (outputParameters.Length > 0)
+                            {
+                                return GetCallMethodDeclarationSyntax(outputParameters,
+                                                                      contract,
+                                                                      abi,
+                                                                      outputTypes,
+                                                                      methodParameters,
+                                                                      callParameters);
+                            }
+
+                            return GetSendTxMethodDeclarationSyntax(callParameters,
+                                                                    abi,
+                                                                    methodParameters);
+                        case MemberType.Event:
+                            return GetEventMethodDeclarationSyntax(inputParameters,
+                                                                   contract,
+                                                                   abi,
+                                                                   outputTypes);
+                        default:
+                            throw new InvalidEnumArgumentException(nameof(abi.Type),
+                                                                   (int) abi.Type,
+                                                                   typeof(MemberType));
                     }
-
-                    if (outputParameters.Length > 0)
-                    {
-                        SyntaxToken outputType;
-                        string methodName;
-
-                        if (outputParameters.Length == 1)
-                        {
-                            outputType = Identifier(outputParameters.Single()
-                                                        .Type);
-                            methodName = nameof(Function.CallAsync);
-                        }
-                        else
-                        {
-                            var outputTypeClass = ClassDeclaration(contract + Capitalize(abi.Name) + "Output")
-                                .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                .WithAttributeLists(
-                                    SingletonList(
-                                        AttributeList(
-                                            SingletonSeparatedList(
-                                                Attribute(
-                                                    IdentifierName(nameof(FunctionOutputAttribute)))))))
-                                .AddMembers(outputParameters
-                                                .Select((output,
-                                                         i) => PropertyDeclaration(IdentifierName(output.Type),
-                                                                                   output.Name)
-                                                            .WithAttributeLists(
-                                                                SingletonList(
-                                                                    AttributeList(
-                                                                        SingletonSeparatedList(
-                                                                            Attribute(
-                                                                                    IdentifierName(nameof(ParameterAttribute)))
-                                                                                .AddArgumentListArguments(AttributeArgument(
-                                                                                                              LiteralExpression(
-                                                                                                                  SyntaxKind
-                                                                                                                      .StringLiteralExpression,
-                                                                                                                  Literal(
-                                                                                                                      output
-                                                                                                                          .OriginalType))),
-                                                                                                          AttributeArgument(
-                                                                                                              LiteralExpression(
-                                                                                                                  SyntaxKind
-                                                                                                                      .NumericLiteralExpression,
-                                                                                                                  Literal(i + 1))))))))
-                                                            .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                                                            .AddAccessorListAccessors(AccessorDeclaration(
-                                                                                              SyntaxKind.GetAccessorDeclaration)
-                                                                                          .WithSemicolonToken(
-                                                                                              Token(SyntaxKind.SemicolonToken)),
-                                                                                      AccessorDeclaration(
-                                                                                              SyntaxKind.SetAccessorDeclaration)
-                                                                                          .WithSemicolonToken(
-                                                                                              Token(SyntaxKind.SemicolonToken))))
-                                                .Cast<MemberDeclarationSyntax>()
-                                                .ToArray());
-
-                            outputTypes.Add(outputTypeClass);
-
-                            outputType = outputTypeClass.Identifier;
-                            methodName = nameof(Function.CallDeserializingToObjectAsync);
-                        }
-
-                        var methodDeclarationSyntax = MethodDeclaration(
-                                GenericName(
-                                        Identifier("Task"))
-                                    .AddTypeArgumentListArguments(
-                                        IdentifierName(outputType)),
-                                Identifier(Capitalize(abi.Name) + "Async"))
-                            .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                            .AddParameterListParameters(methodParameters)
-                            .WithExpressionBody(
-                                ArrowExpressionClause(
-                                    InvocationExpression(
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                InvocationExpression(
-                                                        MemberAccessExpression(
-                                                            SyntaxKind.SimpleMemberAccessExpression,
-                                                            IdentifierName("Contract"),
-                                                            IdentifierName("GetFunction")))
-                                                    .AddArgumentListArguments(
-                                                        Argument(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal(abi.Name)))),
-                                                GenericName(
-                                                        Identifier(methodName))
-                                                    .AddTypeArgumentListArguments(
-                                                        IdentifierName(outputType))))
-                                        .AddArgumentListArguments(callParameters)))
-                            .WithSemicolonToken(
-                                Token(SyntaxKind.SemicolonToken));
-                        return methodDeclarationSyntax;
-                    }
-
-                    var sendTxCallParameters = new[]
-                        {
-                            Argument(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            IdentifierName("Web3"),
-                                            IdentifierName("TransactionManager")),
-                                        IdentifierName("Account")),
-                                    IdentifierName("Address")))
-                        }.Concat(callParameters)
-                        .ToArray();
-
-                    return MethodDeclaration(
-                            IdentifierName("Task"),
-                            Identifier(Capitalize(abi.Name) + "Async"))
-                        .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                        .AddParameterListParameters(
-                            methodParameters)
-                        .WithExpressionBody(
-                            ArrowExpressionClause(
-                                InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            InvocationExpression(
-                                                    MemberAccessExpression(
-                                                        SyntaxKind.SimpleMemberAccessExpression,
-                                                        IdentifierName("Contract"),
-                                                        IdentifierName("GetFunction")))
-                                                .AddArgumentListArguments(
-                                                    Argument(
-                                                        LiteralExpression(
-                                                            SyntaxKind.StringLiteralExpression,
-                                                            Literal(abi.Name)))),
-                                            IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
-                                    .AddArgumentListArguments(
-                                        sendTxCallParameters)))
-                        .WithSemicolonToken(
-                            Token(SyntaxKind.SemicolonToken));
                 });
 
                 var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>()
@@ -346,6 +234,10 @@ namespace Solidity.Roslyn
                                UsingDirective(
                                    QualifiedName(
                                        IdentifierName("Nethereum"),
+                                       IdentifierName("Contracts"))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       IdentifierName("Nethereum"),
                                        IdentifierName("Web3"))))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
@@ -354,6 +246,236 @@ namespace Solidity.Roslyn
             });
 
             return Task.FromResult(List<MemberDeclarationSyntax>(results));
+        }
+
+        private static MethodDeclarationSyntax GetEventMethodDeclarationSyntax(ParameterDescription[] inputParameters,
+                                                                               string contract,
+                                                                               Abi abi,
+                                                                               List<MemberDeclarationSyntax> outputTypes)
+        {
+            var members = inputParameters
+                .Select((output,
+                         i) => PropertyDeclaration(IdentifierName(output.Type),
+                                                   Capitalize(output.Name))
+                            .WithAttributeLists(
+                                SingletonList(
+                                    AttributeList(
+                                        SingletonSeparatedList(
+                                            Attribute(
+                                                    IdentifierName(nameof(ParameterAttribute)))
+                                                .AddArgumentListArguments(
+                                                    AttributeArgument(
+                                                        LiteralExpression(
+                                                            SyntaxKind
+                                                                .StringLiteralExpression,
+                                                            Literal(
+                                                                output
+                                                                    .OriginalType))),
+                                                    AttributeArgument(
+                                                        LiteralExpression(
+                                                            SyntaxKind
+                                                                .StringLiteralExpression,
+                                                            Literal(
+                                                                output
+                                                                    .Name))),
+                                                    AttributeArgument(
+                                                        LiteralExpression(
+                                                            SyntaxKind
+                                                                .NumericLiteralExpression,
+                                                            Literal(i + 1))),
+                                                    AttributeArgument(
+                                                        LiteralExpression(
+                                                            output.Indexed ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression)))))))
+                            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                            .AddAccessorListAccessors(AccessorDeclaration(
+                                                              SyntaxKind.GetAccessorDeclaration)
+                                                          .WithSemicolonToken(
+                                                              Token(SyntaxKind.SemicolonToken)),
+                                                      AccessorDeclaration(
+                                                              SyntaxKind.SetAccessorDeclaration)
+                                                          .WithSemicolonToken(
+                                                              Token(SyntaxKind.SemicolonToken))))
+                .Cast<MemberDeclarationSyntax>()
+                .ToArray();
+            var eventDto = ClassDeclaration(default(SyntaxList<AttributeListSyntax>),
+                                            TokenList(Token(SyntaxKind.PublicKeyword)),
+                                            Identifier(contract + Capitalize(abi.Name) + "EventDTO"),
+                                            default(TypeParameterListSyntax),
+                                            default(BaseListSyntax),
+                                            default(SyntaxList<TypeParameterConstraintClauseSyntax>),
+                                            List(members));
+
+            outputTypes.Add(eventDto);
+
+            return MethodDeclaration(
+                    IdentifierName(nameof(Event)),
+                    Identifier($"Get{Capitalize(abi.Name)}Event"))
+                .WithModifiers(
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword)))
+                .WithExpressionBody(
+                    ArrowExpressionClause(
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName("Contract"),
+                                    IdentifierName(nameof(Nethereum.Contracts.Contract.GetEvent))))
+                            .WithArgumentList(
+                                ArgumentList(
+                                    SingletonSeparatedList(
+                                        Argument(
+                                            LiteralExpression(
+                                                SyntaxKind.StringLiteralExpression,
+                                                Literal(abi.Name))))))))
+                .WithSemicolonToken(
+                    Token(SyntaxKind.SemicolonToken));
+        }
+
+        private static MethodDeclarationSyntax GetSendTxMethodDeclarationSyntax(ArgumentSyntax[] callParameters,
+                                                                            Abi abi,
+                                                                            ParameterSyntax[] methodParameters)
+        {
+            var sendTxCallParameters = new[]
+                {
+                    Argument(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName("Web3"),
+                                    IdentifierName("TransactionManager")),
+                                IdentifierName("Account")),
+                            IdentifierName("Address")))
+                }.Concat(callParameters)
+                .ToArray();
+
+            return MethodDeclaration(
+                    IdentifierName("Task"),
+                    Identifier(Capitalize(abi.Name) + "Async"))
+                .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                .AddParameterListParameters(
+                    methodParameters)
+                .WithExpressionBody(
+                    ArrowExpressionClause(
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    InvocationExpression(
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                IdentifierName("Contract"),
+                                                IdentifierName("GetFunction")))
+                                        .AddArgumentListArguments(
+                                            Argument(
+                                                LiteralExpression(
+                                                    SyntaxKind.StringLiteralExpression,
+                                                    Literal(abi.Name)))),
+                                    IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
+                            .AddArgumentListArguments(
+                                sendTxCallParameters)))
+                .WithSemicolonToken(
+                    Token(SyntaxKind.SemicolonToken));
+        }
+
+        private static MethodDeclarationSyntax GetCallMethodDeclarationSyntax(ParameterDescription[] outputParameters,
+                                                                              string contract,
+                                                                              Abi abi,
+                                                                              List<MemberDeclarationSyntax> outputTypes,
+                                                                              ParameterSyntax[] methodParameters,
+                                                                              ArgumentSyntax[] callParameters)
+        {
+            SyntaxToken outputType;
+            string methodName;
+
+            if (outputParameters.Length == 1)
+            {
+                outputType = Identifier(outputParameters.Single()
+                                            .Type);
+                methodName = nameof(Function.CallAsync);
+            }
+            else
+            {
+                var outputTypeClass = ClassDeclaration(contract + Capitalize(abi.Name) + "Output")
+                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                    .WithAttributeLists(
+                        SingletonList(
+                            AttributeList(
+                                SingletonSeparatedList(
+                                    Attribute(
+                                        IdentifierName(nameof(FunctionOutputAttribute)))))))
+                    .AddMembers(outputParameters
+                                    .Select((output,
+                                             i) => PropertyDeclaration(IdentifierName(output.Type),
+                                                                       output.Name)
+                                                .WithAttributeLists(
+                                                    SingletonList(
+                                                        AttributeList(
+                                                            SingletonSeparatedList(
+                                                                Attribute(
+                                                                        IdentifierName(nameof(ParameterAttribute)))
+                                                                    .AddArgumentListArguments(AttributeArgument(
+                                                                                                  LiteralExpression(
+                                                                                                      SyntaxKind
+                                                                                                          .StringLiteralExpression,
+                                                                                                      Literal(
+                                                                                                          output
+                                                                                                              .OriginalType))),
+                                                                                              AttributeArgument(
+                                                                                                  LiteralExpression(
+                                                                                                      SyntaxKind
+                                                                                                          .NumericLiteralExpression,
+                                                                                                      Literal(i + 1))))))))
+                                                .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                                                .AddAccessorListAccessors(AccessorDeclaration(
+                                                                                  SyntaxKind.GetAccessorDeclaration)
+                                                                              .WithSemicolonToken(
+                                                                                  Token(SyntaxKind.SemicolonToken)),
+                                                                          AccessorDeclaration(
+                                                                                  SyntaxKind.SetAccessorDeclaration)
+                                                                              .WithSemicolonToken(
+                                                                                  Token(SyntaxKind.SemicolonToken))))
+                                    .Cast<MemberDeclarationSyntax>()
+                                    .ToArray());
+
+                outputTypes.Add(outputTypeClass);
+
+                outputType = outputTypeClass.Identifier;
+                methodName = nameof(Function.CallDeserializingToObjectAsync);
+            }
+
+            var methodDeclarationSyntax = MethodDeclaration(
+                    GenericName(
+                            Identifier("Task"))
+                        .AddTypeArgumentListArguments(
+                            IdentifierName(outputType)),
+                    Identifier(Capitalize(abi.Name) + "Async"))
+                .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                .AddParameterListParameters(methodParameters)
+                .WithExpressionBody(
+                    ArrowExpressionClause(
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    InvocationExpression(
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                IdentifierName("Contract"),
+                                                IdentifierName("GetFunction")))
+                                        .AddArgumentListArguments(
+                                            Argument(
+                                                LiteralExpression(
+                                                    SyntaxKind.StringLiteralExpression,
+                                                    Literal(abi.Name)))),
+                                    GenericName(
+                                            Identifier(methodName))
+                                        .AddTypeArgumentListArguments(
+                                            IdentifierName(outputType))))
+                            .AddArgumentListArguments(callParameters)))
+                .WithSemicolonToken(
+                    Token(SyntaxKind.SemicolonToken));
+            return methodDeclarationSyntax;
         }
 
         private static MethodDeclarationSyntax GetConstructodDeclaration(SyntaxToken web3Identifier,
@@ -437,14 +559,16 @@ namespace Solidity.Roslyn
             public string Name { get; }
             public string Type { get; }
             public string OriginalType { get; }
+            public bool Indexed { get; }
 
-            public ParameterDescription(string name, string type, string originalType, string missingReplacement) : this()
+            public ParameterDescription(string name, string type, string originalType, string missingReplacement, bool indexed) : this()
             {
                 Name = !string.IsNullOrEmpty(name)
                            ? name
                            : missingReplacement;
                 Type = type;
                 OriginalType = originalType;
+                Indexed = indexed;
             }
         }
     }

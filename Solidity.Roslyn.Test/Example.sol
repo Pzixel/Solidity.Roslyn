@@ -40,13 +40,16 @@ contract baseContract {
 }
 
 contract derivedContract is baseContract {
+    uint public greetCount;
     string public greeting;
+    event Greet(uint indexed greetId, string text);
 
     function greeter(string _greeting) public {
         greeting = _greeting;
     }
 
-    function greet() public view returns (string) {
-        return greeting;
+    function greet() public {
+        emit Greet(greetCount, greeting);
+        greetCount++;
     }
 }
