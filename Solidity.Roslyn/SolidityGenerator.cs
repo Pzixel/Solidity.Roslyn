@@ -31,10 +31,9 @@ namespace Solidity.Roslyn
                                                                        IProgress<Diagnostic> progress,
                                                                        CancellationToken cancellationToken)
         {
-            var solidityFiles =
-                Directory.EnumerateFiles(context.ProjectDirectory,
-                                         "*.sol",
-                                         SearchOption.AllDirectories);
+            var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory,
+                                                         "*.sol",
+                                                         SearchOption.AllDirectories);
 
             var jsons = solidityFiles.Select(file =>
             {
@@ -54,8 +53,7 @@ namespace Solidity.Roslyn
                 return output;
             });
 
-            var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>)
-                .SelectMany(x => x.Contracts);
+            var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>).SelectMany(x => x.Contracts);
 
             var typeConverter = new ABITypeToCSharpType();
 
@@ -559,7 +557,7 @@ namespace Solidity.Roslyn
 
         private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
 
-        public struct ParameterDescription
+        private struct ParameterDescription
         {
             public string Name { get; }
             public string Type { get; }
