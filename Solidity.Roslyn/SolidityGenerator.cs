@@ -206,8 +206,6 @@ namespace Solidity.Roslyn
 
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                     .AddUsings(UsingDirective(
-                                   IdentifierName(nameof(System))),
-                               UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
                                            IdentifierName(nameof(System)),
