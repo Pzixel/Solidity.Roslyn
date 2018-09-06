@@ -584,7 +584,7 @@ namespace Solidity.Roslyn
                                         bool indexed) : this()
             {
                 Name = !string.IsNullOrEmpty(name)
-                           ? name
+                           ? Capitalize(name)
                            : missingReplacement;
                 Type = type;
                 OriginalType = originalType;
