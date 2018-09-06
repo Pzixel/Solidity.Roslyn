@@ -206,39 +206,39 @@ namespace Solidity.Roslyn
 
                 var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
                     .AddUsings(UsingDirective(
-                                   IdentifierName("System")),
+                                   IdentifierName(nameof(System))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
-                                           IdentifierName("System"),
-                                           IdentifierName("Collections")),
-                                       IdentifierName("Generic"))),
+                                           IdentifierName(nameof(System)),
+                                           IdentifierName(nameof(System.Collections))),
+                                       IdentifierName(nameof(System.Collections.Generic)))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName("System"),
-                                       IdentifierName("Numerics"))),
+                                       IdentifierName(nameof(System)),
+                                       IdentifierName(nameof(System.Numerics)))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
-                                           IdentifierName("System"),
-                                           IdentifierName("Threading")),
-                                       IdentifierName("Tasks"))),
+                                           IdentifierName(nameof(System)),
+                                           IdentifierName(nameof(System.Threading))),
+                                       IdentifierName(nameof(System.Threading.Tasks)))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
                                            QualifiedName(
-                                               IdentifierName("Nethereum"),
-                                               IdentifierName("ABI")),
-                                           IdentifierName("FunctionEncoding")),
-                                       IdentifierName("Attributes"))),
+                                               IdentifierName(nameof(Nethereum)),
+                                               IdentifierName(nameof(Nethereum.ABI))),
+                                           IdentifierName(nameof(Nethereum.ABI.FunctionEncoding))),
+                                       IdentifierName(nameof(Nethereum.ABI.FunctionEncoding.Attributes)))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName("Nethereum"),
-                                       IdentifierName("Contracts"))),
+                                       IdentifierName(nameof(Nethereum)),
+                                       IdentifierName(nameof(Nethereum.Contracts)))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName("Nethereum"),
-                                       IdentifierName("Web3"))))
+                                       IdentifierName(nameof(Nethereum)),
+                                       IdentifierName(nameof(Nethereum.Web3)))))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
 
