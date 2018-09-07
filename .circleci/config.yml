@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Install solidity
-          command: git clone --depth 1 --recursive -b release https://github.com/ethereum/solidity && cd /solidity && cmake -DCMAKE_BUILD_TYPE=Release -DTESTS=0 -DSTATIC_LINKING=1 && cd /solidity && make solc && install -s  solc/solc /usr/bin && cd / && rm -rf solidity   
+          command: git clone --depth 1 --recursive -b release https://github.com/ethereum/solidity && pushd ./solidity && cmake -DCMAKE_BUILD_TYPE=Release -DTESTS=0 -DSTATIC_LINKING=1 && pushd ./solidity && make solc && install -s  solc/solc /usr/bin && popd && popd && rm -rf solidity
       - run:
           name: Restore
           command: dotnet restore
