@@ -6,5 +6,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Greeting
-          command: echo Hello, world.
+          name: Restore
+          command: dotnet restore
+      - run:
+          name: Build
+          command: dotnet build
