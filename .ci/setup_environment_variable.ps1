@@ -1,0 +1,1 @@
+[Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\Solidity", [EnvironmentVariableTarget]::Machine)
