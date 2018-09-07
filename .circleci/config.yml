@@ -18,10 +18,10 @@ jobs:
     machine:
         enabled: true
     steps:
-      - deploy
+      - checkout
       - run:
           name: pack
-          command: dotnet pack Solidity.Roslyn  --configuration=Release --include-symbols --output nupkgs
+          command: dotnet pack Solidity.Roslyn --configuration=Release --include-symbols --output nupkgs
 workflows:
   version: 2
   build-and-deploy:
