@@ -24,6 +24,9 @@ jobs:
       - run:
           name: pack
           command: dotnet pack Solidity.Roslyn --configuration=Release --include-symbols --output nupkgs
+      - run:
+          name: deploy
+          command: dotnet nuget push Solidity.Roslyn/nupkgs/*.nupkg -k $NugetAPIKey
 workflows:
   version: 2
   build-and-deploy:
