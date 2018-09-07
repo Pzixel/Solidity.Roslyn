@@ -13,4 +13,4 @@ jobs:
           command: dotnet build      
       - run:
           name: Test
-          command: dotnet test
+          command: dotnet test Solidity.Roslyn.Test
