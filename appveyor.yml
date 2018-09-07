@@ -16,6 +16,8 @@ install:
   - ps: Invoke-WebRequest https://github.com/ethereum/solidity/releases/download/v0.4.24/solidity-windows.zip -OutFile C:\Solidity\solc.zip
   - 7z e C:\Solidity\solc.zip
   - ps: .\.ci\setup_environment_variable.ps1
+  - ps: Restart-Computer
+  - ps: Start-Sleep -s 10
 before_build:
 - ps: nuget restore
 build:
