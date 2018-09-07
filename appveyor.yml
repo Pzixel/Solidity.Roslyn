@@ -8,6 +8,7 @@ skip_commits:
     - .gitignore
     - LICENSE
     - '*.md'
+    - '.circleci/*'
 branches:
   only:
     - master
