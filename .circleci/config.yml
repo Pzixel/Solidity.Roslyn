@@ -18,8 +18,6 @@ jobs:
   deploy:
     docker:
       - image: pzixel/solidity-dotnet:latest
-    machine:
-        enabled: true
     working_directory: ~/Solidity.Roslyn            
     steps:
       - checkout
