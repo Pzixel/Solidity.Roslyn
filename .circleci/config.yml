@@ -10,4 +10,7 @@ jobs:
           command: dotnet restore
       - run:
           name: Build
-          command: dotnet build
+          command: dotnet build      
+      - run:
+          name: Test
+          command: dotnet test
