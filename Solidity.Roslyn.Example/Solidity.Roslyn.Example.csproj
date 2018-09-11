@@ -4,9 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.65" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
 
     <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.65" />
 
