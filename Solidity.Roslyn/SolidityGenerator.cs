@@ -329,7 +329,8 @@ namespace Solidity.Roslyn
             outputTypes.Add(eventDto);
 
             return MethodDeclaration(
-                    IdentifierName(nameof(Event)),
+                    GenericName(nameof(Event))
+                        .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier)),
                     Identifier($"Get{Capitalize(abi.Name)}Event"))
                 .WithModifiers(
                     TokenList(
@@ -340,7 +341,8 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName(contractProperty),
-                                    IdentifierName(nameof(Nethereum.Contracts.Contract.GetEvent))))
+                                    GenericName(nameof(Nethereum.Contracts.Contract.GetEvent))
+                                        .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier))))
                             .WithArgumentList(
                                 ArgumentList(
                                     SingletonSeparatedList(
@@ -608,7 +610,7 @@ namespace Solidity.Roslyn
                                         string type,
                                         string originalType,
                                         string missingReplacement,
-                                        bool indexed) : this()
+                                        bool indexed)
             {
                 Name = !string.IsNullOrEmpty(name)
                            ? Capitalize(name)
