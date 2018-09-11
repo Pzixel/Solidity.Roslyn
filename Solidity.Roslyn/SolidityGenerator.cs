@@ -38,6 +38,8 @@ namespace Solidity.Roslyn
                                                          "*.sol",
                                                          SearchOption.AllDirectories);
 
+            string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
+
             var jsons = solidityFiles.Select(file =>
             {
                 var process = new Process
@@ -218,7 +220,9 @@ namespace Solidity.Roslyn
                 var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>()
                                                                                           .ToArray());
 
-                var namespaceDeclaration = NamespaceDeclaration(IdentifierName(namespaceName))
+                var namespaceDeclaration = NamespaceDeclaration(
+                        QualifiedName(GetQualifiedName(defaultNamespace),
+                                      IdentifierName(namespaceName)))
                     .AddUsings(UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
@@ -266,6 +270,12 @@ namespace Solidity.Roslyn
             });
 
             return Task.FromResult(List<MemberDeclarationSyntax>(results));
+        }
+
+        private static NameSyntax GetQualifiedName(string dotSeparatedName)
+        {
+            var separated = dotSeparatedName.Split('.');
+            return separated.Skip(1).Aggregate((NameSyntax) IdentifierName(separated[0]), (result, segment) => QualifiedName(result, IdentifierName(segment)));
         }
 
         private static MethodDeclarationSyntax GetEventMethodDeclarationSyntax(ParameterDescription[] inputParameters,

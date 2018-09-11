@@ -1,4 +1,4 @@
-﻿using Example;
+﻿using Solidity.Roslyn.Example.Sample;
 using Xunit;
 
 namespace Solidity.Roslyn.Test
