@@ -1,9 +1,28 @@
 pragma solidity ^0.4.24;
 
-contract baseContract {
+contract Owned {
+    address public owner;
+
+    constructor() public {
+        owner = tx.origin;
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function isDeployed() public pure returns (bool) {
+        return true;
+    }
+}
+
+contract SampleContract is Owned {
     address public owner;
     uint64 public x;
     uint64 public y;
+    uint public greetCount;
+    event Greet(uint indexed greetId, string text);
 
     constructor(uint64 x_, uint64 y_) public {
         owner = msg.sender;
@@ -34,19 +53,9 @@ contract baseContract {
     function returnMultiple() public pure returns (uint64[], bytes32[]) {
         return (new uint64[](1), new bytes32[](3));
     }
-}
-
-contract derivedContract is baseContract {
-    uint public greetCount;
-    string public greeting;
-    event Greet(uint indexed greetId, string text);
-
-    constructor(string _greeting) public {
-        greeting = _greeting;
-    }
 
     function greet() public {
-        emit Greet(greetCount, greeting);
+        emit Greet(greetCount, "Hello");
         greetCount++;
     }
 }
