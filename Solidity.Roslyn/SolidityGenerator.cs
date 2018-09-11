@@ -249,6 +249,14 @@ namespace Solidity.Roslyn
                                        IdentifierName(nameof(Nethereum.Contracts)))),
                                UsingDirective(
                                    QualifiedName(
+                                       QualifiedName(
+                                           QualifiedName(
+                                               IdentifierName(nameof(Nethereum)),
+                                               IdentifierName(nameof(Nethereum.RPC))),
+                                           IdentifierName(nameof(Nethereum.RPC.Eth))),
+                                       IdentifierName(nameof(Nethereum.RPC.Eth.DTOs)))),
+                               UsingDirective(
+                                   QualifiedName(
                                        IdentifierName(nameof(Nethereum)),
                                        IdentifierName(nameof(Nethereum.Web3)))))
                     .AddMembers(classDeclarationWithMethods)
@@ -366,7 +374,10 @@ namespace Solidity.Roslyn
                 .ToArray();
 
             return MethodDeclaration(
-                    IdentifierName(nameof(Task)),
+                    GenericName(
+                            Identifier(nameof(Task)))
+                        .AddTypeArgumentListArguments(
+                            IdentifierName(nameof(TransactionReceipt))),
                     Identifier(Capitalize(abi.Name) + "Async"))
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
@@ -509,12 +520,16 @@ namespace Solidity.Roslyn
                 }.Concat(methodParameters)
                 .ToArray();
 
-            var syntaxToken = Identifier("receipt");
+            var receiptSyntaxToken = Identifier("receipt");
+            var deployedContractSyntaxToken = Identifier("deployedContract");
+            var deploymentResultType = GenericName(
+                    nameof(DeploymentResult<ContractBase>))
+                .AddTypeArgumentListArguments(IdentifierName(contractClassDeclaration.Identifier));
             return MethodDeclaration(
                     GenericName(
                             Identifier(nameof(Task)))
                         .AddTypeArgumentListArguments(
-                            IdentifierName(contractClassDeclaration.Identifier)),
+                            deploymentResultType),
                     Identifier("DeployAsync"))
                 .AddModifiers(
                     Token(SyntaxKind.PublicKeyword),
@@ -528,7 +543,7 @@ namespace Solidity.Roslyn
                                 IdentifierName("var"))
                             .AddVariables(
                                 VariableDeclarator(
-                                        syntaxToken)
+                                        receiptSyntaxToken)
                                     .WithInitializer(
                                         EqualsValueClause(
                                             AwaitExpression(
@@ -556,16 +571,28 @@ namespace Solidity.Roslyn
                                                                         SyntaxKind.ArrayInitializerExpression,
                                                                         SeparatedList<ExpressionSyntax>(
                                                                             initializerParameters)))))))))),
+                    LocalDeclarationStatement(
+                        VariableDeclaration(
+                                IdentifierName("var"))
+                            .AddVariables(
+                                VariableDeclarator(
+                                        deployedContractSyntaxToken)
+                                    .WithInitializer(
+                                        EqualsValueClause(
+                                            ObjectCreationExpression(
+                                                    IdentifierName(contractClassDeclaration.Identifier))
+                                                .AddArgumentListArguments(Argument(
+                                                                              IdentifierName(web3Identifier)),
+                                                                          Argument(
+                                                                              MemberAccessExpression(
+                                                                                  SyntaxKind.SimpleMemberAccessExpression,
+                                                                                  IdentifierName(receiptSyntaxToken),
+                                                                                  IdentifierName(nameof(TransactionReceipt.ContractAddress))))))))),
                     ReturnStatement(
-                        ObjectCreationExpression(
-                                IdentifierName(contractClassDeclaration.Identifier))
-                            .AddArgumentListArguments(Argument(
-                                                          IdentifierName(web3Identifier)),
-                                                      Argument(
-                                                          MemberAccessExpression(
-                                                              SyntaxKind.SimpleMemberAccessExpression,
-                                                              IdentifierName(syntaxToken),
-                                                              IdentifierName(nameof(TransactionReceipt.ContractAddress)))))));
+                        ObjectCreationExpression(deploymentResultType)
+                            .AddArgumentListArguments(
+                                Argument(IdentifierName(deployedContractSyntaxToken)),
+                                Argument(IdentifierName(receiptSyntaxToken)))));
         }
 
         private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
