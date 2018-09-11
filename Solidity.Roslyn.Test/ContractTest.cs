@@ -1,8 +1,5 @@
 ﻿using Example;
-using Solidity.Roslyn;
 using Xunit;
-
-[assembly: Solidity]
 
 namespace Solidity.Roslyn.Test
 {

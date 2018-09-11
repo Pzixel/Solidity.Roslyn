@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.65" />
+
+    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.65" />
+
+    <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
+  </ItemGroup>
+</Project>
