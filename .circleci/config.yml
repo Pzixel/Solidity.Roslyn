@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: pzixel/solidity-dotnet:latest
+    working_directory: ~/Solidity.Roslyn
+    steps:
+      - checkout
+      - run:
+          name: Restore
+          command: dotnet restore
+      - run:
+          name: Build
+          command: dotnet build      
+      - run:
+          name: Test
+          command: dotnet test Solidity.Roslyn.Test
+  deploy:
+    docker:
+      - image: pzixel/solidity-dotnet:latest
+    working_directory: ~/Solidity.Roslyn            
+    steps:
+      - checkout
+      - run:
+          name: pack
+          command: dotnet pack Solidity.Roslyn --configuration=Release --include-symbols --output nupkgs
+      - run:
+          name: deploy
+          command: dotnet nuget push Solidity.Roslyn/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://www.nuget.org
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+          context: NuGet
+            

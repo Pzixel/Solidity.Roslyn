@@ -34,9 +34,29 @@ namespace Solidity.Roslyn
                                                                        IProgress<Diagnostic> progress,
                                                                        CancellationToken cancellationToken)
         {
-            var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory,
-                                                         "*.sol",
-                                                         SearchOption.AllDirectories);
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "solc",
+                        Arguments = "--version",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                try
+                {
+                    process.Start();
+                }
+                catch
+                {
+                    throw new InvalidOperationException("System doesn't have solc available in PATH.");
+                }
+            }
+
+            var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories);
 
             string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
 
