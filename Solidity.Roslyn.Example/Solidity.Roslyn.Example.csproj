@@ -1,17 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.65" />
+    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.74">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
 
-    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.65" />
+    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.74" />
 
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
-  </ItemGroup>
-  <!-- Include deps files because the source code generator framework needs them-->
-  <ItemGroup>
-    <None Remove="bin\**" Visible="false" />
-    <None Include="bin\$(Configuration)\$(TargetFramework)\*.deps.json" Pack="true" PackagePath="lib\$(TargetFramework)" Visible="false" />
   </ItemGroup>
 </Project>
