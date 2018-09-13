@@ -24,4 +24,9 @@
     <RepositoryUrl>https://github.com/Pzixel/Solidity.Roslyn</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+  <!-- Include deps files because the source code generator framework needs them-->
+  <ItemGroup>
+    <None Remove="bin\**" Visible="false" />
+    <None Include="bin\$(Configuration)\$(TargetFramework)\*.deps.json" Pack="true" PackagePath="lib\$(TargetFramework)" Visible="false" />
+  </ItemGroup>
 </Project>
