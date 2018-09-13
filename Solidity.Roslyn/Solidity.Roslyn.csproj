@@ -5,8 +5,11 @@
   <ItemGroup>
     <PackageReference Include="CodeGeneration.Roslyn" Version="0.4.65" />
     <PackageReference Include="Nethereum.ABI" Version="2.5.1" />
+    <PackageReference Include="Nethereum.Generators" Version="1.0.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Nethereum.Web3" Version="2.5.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -21,4 +24,9 @@
     <RepositoryUrl>https://github.com/Pzixel/Solidity.Roslyn</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+  <!-- Include deps files because the source code generator framework needs them-->
+  <ItemGroup>
+    <None Remove="bin\**" Visible="false" />
+    <None Include="bin\$(Configuration)\$(TargetFramework)\*.deps.json" Pack="true" PackagePath="lib\$(TargetFramework)" Visible="false" />
+  </ItemGroup>
 </Project>
