@@ -11,13 +11,6 @@ using CodeGeneration.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.Contracts;
-using Nethereum.Generators.Core;
-using Nethereum.RPC.Accounts;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.RPC.TransactionManagers;
-using Nethereum.Web3;
 using Newtonsoft.Json;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -130,7 +123,7 @@ namespace Solidity.Roslyn
                                 Parameter(
                                         web3Identifier)
                                     .WithType(
-                                        IdentifierName(nameof(Web3))),
+                                        IdentifierName("Web3")),
                                 Parameter(
                                         addressIdentifier)
                                     .WithType(
@@ -263,26 +256,26 @@ namespace Solidity.Roslyn
                                    QualifiedName(
                                        QualifiedName(
                                            QualifiedName(
-                                               IdentifierName(nameof(Nethereum)),
-                                               IdentifierName(nameof(Nethereum.ABI))),
-                                           IdentifierName(nameof(Nethereum.ABI.FunctionEncoding))),
-                                       IdentifierName(nameof(Nethereum.ABI.FunctionEncoding.Attributes)))),
+                                               IdentifierName("Nethereum"),
+                                               IdentifierName("ABI")),
+                                           IdentifierName("FunctionEncoding")),
+                                       IdentifierName("Attributes"))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName(nameof(Nethereum)),
-                                       IdentifierName(nameof(Nethereum.Contracts)))),
+                                       IdentifierName("Nethereum"),
+                                       IdentifierName("Contracts"))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
                                            QualifiedName(
-                                               IdentifierName(nameof(Nethereum)),
-                                               IdentifierName(nameof(Nethereum.RPC))),
-                                           IdentifierName(nameof(Nethereum.RPC.Eth))),
-                                       IdentifierName(nameof(Nethereum.RPC.Eth.DTOs)))),
+                                               IdentifierName("Nethereum"),
+                                               IdentifierName("RPC")),
+                                           IdentifierName("Eth")),
+                                       IdentifierName("DTOs"))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName(nameof(Nethereum)),
-                                       IdentifierName(nameof(Nethereum.Web3)))))
+                                       IdentifierName("Nethereum"),
+                                       IdentifierName("Web3"))))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
 
@@ -313,7 +306,7 @@ namespace Solidity.Roslyn
                                     AttributeList(
                                         SingletonSeparatedList(
                                             Attribute(
-                                                    IdentifierName(nameof(ParameterAttribute)))
+                                                    IdentifierName("ParameterAttribute"))
                                                 .AddArgumentListArguments(
                                                     AttributeArgument(
                                                         LiteralExpression(
@@ -359,7 +352,7 @@ namespace Solidity.Roslyn
             outputTypes.Add(eventDto);
 
             return MethodDeclaration(
-                    GenericName(nameof(Event))
+                    GenericName("Event")
                         .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier)),
                     Identifier($"Get{Capitalize(abi.Name)}Event"))
                 .WithModifiers(
@@ -371,7 +364,7 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName(contractProperty),
-                                    GenericName(nameof(Nethereum.Contracts.Contract.GetEvent))
+                                    GenericName("GetEvent")
                                         .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier))))
                             .WithArgumentList(
                                 ArgumentList(
@@ -399,9 +392,9 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName("Web3"),
-                                    IdentifierName(nameof(Web3.TransactionManager))),
-                                IdentifierName(nameof(ITransactionManager.Account))),
-                            IdentifierName(nameof(IAccount.Address))))
+                                    IdentifierName("TransactionManager")),
+                                IdentifierName("Account")),
+                            IdentifierName("Address")))
                 }.Concat(callParameters)
                 .ToArray();
 
@@ -409,7 +402,7 @@ namespace Solidity.Roslyn
                     GenericName(
                             Identifier(nameof(Task)))
                         .AddTypeArgumentListArguments(
-                            IdentifierName(nameof(TransactionReceipt))),
+                            IdentifierName("TransactionReceipt")),
                     Identifier(Capitalize(abi.Name) + "Async"))
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
@@ -423,7 +416,7 @@ namespace Solidity.Roslyn
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 IdentifierName(contractProperty),
-                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
+                                                IdentifierName("GetFunction")))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
@@ -451,7 +444,7 @@ namespace Solidity.Roslyn
             {
                 outputType = Identifier(outputParameters.Single()
                                             .Type);
-                methodName = nameof(Function.CallAsync);
+                methodName = "CallAsync";
             }
             else
             {
@@ -462,7 +455,7 @@ namespace Solidity.Roslyn
                             AttributeList(
                                 SingletonSeparatedList(
                                     Attribute(
-                                        IdentifierName(nameof(FunctionOutputAttribute)))))))
+                                        IdentifierName("FunctionOutputAttribute"))))))
                     .AddMembers(outputParameters
                                     .Select((output,
                                              i) => PropertyDeclaration(IdentifierName(output.Type),
@@ -472,7 +465,7 @@ namespace Solidity.Roslyn
                                                         AttributeList(
                                                             SingletonSeparatedList(
                                                                 Attribute(
-                                                                        IdentifierName(nameof(ParameterAttribute)))
+                                                                        IdentifierName("ParameterAttribute"))
                                                                     .AddArgumentListArguments(AttributeArgument(
                                                                                                   LiteralExpression(
                                                                                                       SyntaxKind
@@ -500,7 +493,7 @@ namespace Solidity.Roslyn
                 outputTypes.Add(outputTypeClass);
 
                 outputType = outputTypeClass.Identifier;
-                methodName = nameof(Function.CallDeserializingToObjectAsync);
+                methodName = "CallDeserializingToObjectAsync";
             }
 
             var methodDeclarationSyntax = MethodDeclaration(
@@ -520,7 +513,7 @@ namespace Solidity.Roslyn
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 IdentifierName(contractProperty),
-                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
+                                                IdentifierName("GetFunction")))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
@@ -548,7 +541,7 @@ namespace Solidity.Roslyn
                     Parameter(
                             web3Identifier)
                         .WithType(
-                            IdentifierName(nameof(Web3)))
+                            IdentifierName("Web3"))
                 }.Concat(methodParameters)
                 .ToArray();
 
@@ -619,7 +612,7 @@ namespace Solidity.Roslyn
                                                                               MemberAccessExpression(
                                                                                   SyntaxKind.SimpleMemberAccessExpression,
                                                                                   IdentifierName(receiptSyntaxToken),
-                                                                                  IdentifierName(nameof(TransactionReceipt.ContractAddress))))))))),
+                                                                                  IdentifierName("ContractAddress")))))))),
                     ReturnStatement(
                         ObjectCreationExpression(deploymentResultType)
                             .AddArgumentListArguments(
@@ -650,5 +643,196 @@ namespace Solidity.Roslyn
                 Indexed = indexed;
             }
         }
+    }
+
+    public class ABITypeToCSharpType: ABITypeToDotNetTypeBase
+    {
+        protected override string GetLongType()
+        {
+            return "long";
+        }
+
+        protected override string GetULongType()
+        {
+            return "ulong";
+        }
+
+        protected override string GetIntType()
+        {
+            return "int";
+        }
+
+        protected override string GetUIntType()
+        {
+            return "uint";
+        }
+
+        protected override string GetShortType()
+        {
+            return "short";
+        }
+
+        protected override string GetUShortType()
+        {
+            return "ushort";
+        }
+
+        protected override string GetByteType()
+        {
+            return "byte";
+        }
+
+        protected override string GetSByteType()
+        {
+            return "sbyte";
+        }
+
+        protected override string GetByteArrayType()
+        {
+            return "byte[]";
+        }
+
+        protected override string GetStringType()
+        {
+            return "string";
+        }
+
+        protected override string GetBooleanType()
+        {
+            return "bool";
+        }
+
+        protected override string GetBigIntegerType()
+        {
+            return "BigInteger";
+        }
+
+        protected override string GetArrayType(string type)
+        {
+            return type + "[]";
+        }
+
+        protected override string GetListType(string type)
+        {
+            return "List<" + type + ">";
+        }
+    }
+
+       public abstract class ABITypeToDotNetTypeBase
+    {
+        public string Convert(string typeName, bool outputArrayAsList = false)
+        {
+            var indexFirstBracket = typeName.IndexOf("[");
+            if (indexFirstBracket > -1)
+            {
+                var elementTypeName = typeName.Substring(0, indexFirstBracket);
+                if (outputArrayAsList)
+                {
+                    return GetListType(Convert(elementTypeName, true));
+                }
+                else
+                {
+                    return GetArrayType(Convert(elementTypeName));
+                }
+            }
+            if ("bool" == typeName)
+            {
+                return GetBooleanType();
+            }
+            if (typeName.StartsWith("int"))
+            {
+                //default
+                if (typeName.Length == 3)
+                {
+                    return GetBigIntegerType();
+                }
+                var length = Int32.Parse(typeName.Substring(3));
+
+                if (length > 64)
+                {
+                    return GetBigIntegerType();
+                }
+                if (length <= 64 && length > 32)
+                {
+                    return GetLongType();
+                }
+                //ints are in 8 bits
+                if (length == 32)
+                {
+                    return GetIntType();
+                }
+                if (length == 16)
+                {
+                    return GetShortType();
+                }
+                if (length == 8)
+                {
+                    return GetSByteType();
+                }
+            }
+            if (typeName.StartsWith("uint"))
+            {
+
+                if (typeName.Length == 4)
+                {
+                    return GetBigIntegerType();
+                }
+                var length = Int32.Parse(typeName.Substring(4));
+
+                if (length > 64)
+                {
+                    return GetBigIntegerType();
+                }
+                if (length <= 64 && length > 32)
+                {
+                    return GetULongType();
+                }
+                //uints are in 8 bits steps
+                if (length == 32)
+                {
+                    return GetUIntType();
+                }
+                if (length == 16)
+                {
+                    return GetUShortType();
+                }
+                if (length == 8)
+                {
+                    return GetByteType();
+                }
+            }
+            if (typeName == "address")
+            {
+                return GetStringType();
+            }
+            if (typeName == "string")
+            {
+                return GetStringType();
+            }
+            if (typeName == "bytes")
+            {
+                return GetByteArrayType();
+            }
+            if (typeName.StartsWith("bytes"))
+            {
+                return GetByteArrayType();
+            }
+            return null;
+        }
+
+        protected abstract string GetLongType();
+        protected abstract string GetULongType();
+        protected abstract string GetIntType();
+        protected abstract string GetUIntType();
+        protected abstract string GetShortType();
+        protected abstract string GetUShortType();
+        protected abstract string GetByteType();
+        protected abstract string GetSByteType();
+        protected abstract string GetByteArrayType();
+        protected abstract string GetStringType();
+        protected abstract string GetBooleanType();
+        protected abstract string GetBigIntegerType();
+        protected abstract string GetArrayType(string type);
+        protected abstract string GetListType(string type);
     }
 }

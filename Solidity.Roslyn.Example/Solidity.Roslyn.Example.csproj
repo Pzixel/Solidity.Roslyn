@@ -9,9 +9,4 @@
 
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
   </ItemGroup>
-  <!-- Include deps files because the source code generator framework needs them-->
-  <ItemGroup>
-    <None Remove="bin\**" Visible="false" />
-    <None Include="bin\$(Configuration)\$(TargetFramework)\*.deps.json" Pack="true" PackagePath="lib\$(TargetFramework)" Visible="false" />
-  </ItemGroup>
 </Project>
