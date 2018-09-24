@@ -103,7 +103,8 @@ namespace Solidity.Roslyn
                                                                 SyntaxKind.StringLiteralExpression,
                                                                 Literal(x.Value.Bin))))))
                                     .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword),
-                                        Token(SyntaxKind.ConstKeyword)))));
+                                        Token(SyntaxKind.ConstKeyword))))
+                            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword))));
                 return classDeclarationSyntax;
             });
 
