@@ -11,10 +11,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.65" />
+    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.4.74">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
 
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
-    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.65" />
+    <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.74" />
 
 
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
