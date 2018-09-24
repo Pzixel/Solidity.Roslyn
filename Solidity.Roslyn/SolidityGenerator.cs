@@ -69,6 +69,7 @@ namespace Solidity.Roslyn
 
             var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>).SelectMany(x => x.Contracts);
 
+            string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
 
             var results = contracts.Select(x=>
             {
@@ -76,7 +77,8 @@ namespace Solidity.Roslyn
                 var contract = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(x.Key.Substring(separatorIndex + 1));
                 var namespaceName = Path.GetFileNameWithoutExtension(x.Key.Remove(separatorIndex));
 
-                var classDeclarationSyntax = NamespaceDeclaration(IdentifierName(namespaceName))
+                var classDeclarationSyntax = NamespaceDeclaration(QualifiedName(GetQualifiedName(defaultNamespace),
+                        IdentifierName(namespaceName)))
                     .AddMembers(
                         ClassDeclaration(contract)
                             .AddMembers(
@@ -109,6 +111,12 @@ namespace Solidity.Roslyn
             });
 
             return Task.FromResult(List<MemberDeclarationSyntax>(results));
+        }
+
+        private static NameSyntax GetQualifiedName(string dotSeparatedName)
+        {
+            var separated = dotSeparatedName.Split('.');
+            return separated.Skip(1).Aggregate((NameSyntax)IdentifierName(separated[0]), (result, segment) => QualifiedName(result, IdentifierName(segment)));
         }
     }
 

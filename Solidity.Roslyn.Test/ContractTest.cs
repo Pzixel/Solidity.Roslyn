@@ -1,5 +1,5 @@
-using Example;
 using Solidity.Roslyn;
+using Solidity.Roslyn.Test.Example;
 using Xunit;
 
 [assembly: Solidity]
