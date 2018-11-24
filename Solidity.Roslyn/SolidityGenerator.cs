@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,7 +21,9 @@ namespace Solidity.Roslyn
         {
         }
 
-        public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
+        public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context,
+                                                                       IProgress<Diagnostic> progress,
+                                                                       CancellationToken cancellationToken)
         {
             {
                 var process = new Process
@@ -49,6 +49,8 @@ namespace Solidity.Roslyn
 
             var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories);
 
+            string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
+
             var jsons = solidityFiles.Select(file =>
             {
                 var process = new Process
@@ -69,45 +71,69 @@ namespace Solidity.Roslyn
 
             var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>).SelectMany(x => x.Contracts);
 
-            string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
-
-            var results = contracts.Select(x=>
+            var results = contracts.Select(x =>
             {
                 int separatorIndex = x.Key.LastIndexOf(':');
-                var contract = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(x.Key.Substring(separatorIndex + 1));
-                var namespaceName = Path.GetFileNameWithoutExtension(x.Key.Remove(separatorIndex));
+                string contract = Capitalize(x.Key.Substring(separatorIndex + 1));
+                string namespaceName = Path.GetFileNameWithoutExtension(x.Key.Remove(separatorIndex));
 
-                var classDeclarationSyntax = NamespaceDeclaration(QualifiedName(GetQualifiedName(defaultNamespace),
-                        IdentifierName(namespaceName)))
+                var abiIdentifier = Identifier("Abi");
+                var binIdentifier = Identifier("Bin");
+
+                var classIdentifier = Identifier(contract);
+
+                var contractClassDeclaration = ClassDeclaration(classIdentifier)
+                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddMembers(
-                        ClassDeclaration(contract)
-                            .AddMembers(
-                                FieldDeclaration(
-                                        VariableDeclaration(
-                                                PredefinedType(Token(SyntaxKind.StringKeyword)))
-                                            .AddVariables(
-                                                VariableDeclarator(Identifier("Abi"))
-                                                    .WithInitializer(
-                                                        EqualsValueClause(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal(x.Value.Abi))))))
-                                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword),
-                                        Token(SyntaxKind.ConstKeyword))),
-                                FieldDeclaration(
-                                        VariableDeclaration(
-                                                PredefinedType(Token(SyntaxKind.StringKeyword)))
-                                            .AddVariables(
-                                                VariableDeclarator(Identifier("Bin"))
-                                                    .WithInitializer(
-                                                        EqualsValueClause(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal(x.Value.Bin))))))
-                                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword),
-                                        Token(SyntaxKind.ConstKeyword))))
-                            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword))));
-                return classDeclarationSyntax;
+                        FieldDeclaration(
+                                VariableDeclaration(
+                                        PredefinedType(Token(SyntaxKind.StringKeyword)))
+                                    .AddVariables(
+                                        VariableDeclarator(abiIdentifier)
+                                            .WithInitializer(
+                                                EqualsValueClause(
+                                                    LiteralExpression(
+                                                        SyntaxKind.StringLiteralExpression,
+                                                        Literal(x.Value.Abi))))))
+                            .AddModifiers(Token(SyntaxKind.PublicKeyword),
+                                          Token(SyntaxKind.ConstKeyword)),
+                        FieldDeclaration(
+                                VariableDeclaration(
+                                        PredefinedType(Token(SyntaxKind.StringKeyword)))
+                                    .AddVariables(
+                                        VariableDeclarator(binIdentifier)
+                                            .WithInitializer(
+                                                EqualsValueClause(
+                                                    LiteralExpression(
+                                                        SyntaxKind.StringLiteralExpression,
+                                                        Literal(x.Value.Bin))))))
+                            .AddModifiers(Token(SyntaxKind.PublicKeyword),
+                                          Token(SyntaxKind.ConstKeyword)));
+
+                var classDeclarationWithMethods = contractClassDeclaration;
+
+                var namespaceDeclaration = NamespaceDeclaration(
+                        QualifiedName(GetQualifiedName(defaultNamespace),
+                                      IdentifierName(namespaceName)))
+                    .AddUsings(UsingDirective(
+                                   QualifiedName(
+                                       QualifiedName(
+                                           IdentifierName(nameof(System)),
+                                           IdentifierName(nameof(System.Collections))),
+                                       IdentifierName(nameof(System.Collections.Generic)))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       IdentifierName(nameof(System)),
+                                       IdentifierName(nameof(System.Numerics)))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       QualifiedName(
+                                           IdentifierName(nameof(System)),
+                                           IdentifierName(nameof(System.Threading))),
+                                       IdentifierName(nameof(System.Threading.Tasks)))))
+                    .AddMembers(classDeclarationWithMethods);
+
+                return namespaceDeclaration;
             });
 
             return Task.FromResult(List<MemberDeclarationSyntax>(results));
@@ -116,19 +142,9 @@ namespace Solidity.Roslyn
         private static NameSyntax GetQualifiedName(string dotSeparatedName)
         {
             var separated = dotSeparatedName.Split('.');
-            return separated.Skip(1).Aggregate((NameSyntax)IdentifierName(separated[0]), (result, segment) => QualifiedName(result, IdentifierName(segment)));
+            return separated.Skip(1).Aggregate((NameSyntax) IdentifierName(separated[0]), (result, segment) => QualifiedName(result, IdentifierName(segment)));
         }
-    }
 
-    class SolcOutput
-    {
-        public string Version { get; set; }
-        public Dictionary<string, Contract> Contracts { get; set; }
-    }
-
-    class Contract
-    {
-        public string Abi { get; set; }
-        public string Bin { get; set; }
+        private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
     }
 }

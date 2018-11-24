@@ -7,10 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Test", "Sol
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn", "Solidity.Roslyn\Solidity.Roslyn.csproj", "{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D7742AE-D15A-4B2E-A851-109FCB71CF36}"
-	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solidity.Roslyn.Example", "Solidity.Roslyn.Example\Solidity.Roslyn.Example.csproj", "{78A34A43-489D-4F17-BD3A-4E6CB89E6134}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +23,10 @@ Global
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
