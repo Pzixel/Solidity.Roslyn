@@ -130,10 +130,6 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal("Hello", eventLogs[0].Event.Text);
         }
 
-        private async Task<SampleContract> GetSampleContract()
-        {
-            var sample = await SampleContract.DeployAsync(Web3, X, Y);
-            return sample;
-        }
+        private Task<SampleContract> GetSampleContract() => SampleContract.DeployAsync(Web3, X, Y);
     }
 }
