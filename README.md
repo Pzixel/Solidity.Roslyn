@@ -1,4 +1,5 @@
 # Solidity.Roslyn
+[![CircleCI](https://circleci.com/gh/Pzixel/Solidity.Roslyn/tree/master.svg?style=svg)](https://circleci.com/gh/Pzixel/Solidity.Roslyn/tree/master)
 
 This library allows you to generate C# wrapper over Solidity contracts, targeting netstandard library. 
 It requires `solc` available in PATH when building.
