@@ -275,7 +275,13 @@ namespace Solidity.Roslyn
                                UsingDirective(
                                    QualifiedName(
                                        IdentifierName("Nethereum"),
-                                       IdentifierName("Web3"))))
+                                       IdentifierName("Web3"))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       QualifiedName(
+                                           IdentifierName("Solidity"),
+                                           IdentifierName("Roslyn")),
+                                       IdentifierName("Core"))))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
 
