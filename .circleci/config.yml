@@ -1,8 +1,8 @@
-version: 2
+﻿version: 2
 jobs:
   build:
     docker:
-      - image: pzixel/solidity-dotnet:latest
+      - image: pzixel/solidity-dotnet:0.5.2
     working_directory: ~/Solidity.Roslyn
     steps:
       - checkout
@@ -17,7 +17,7 @@ jobs:
           command: dotnet test Solidity.Roslyn.Test
   deploy:
     docker:
-      - image: pzixel/solidity-dotnet:latest
+      - image: pzixel/solidity-dotnet:0.5.2
     working_directory: ~/Solidity.Roslyn            
     steps:
       - checkout
@@ -39,4 +39,3 @@ workflows:
             branches:
               only: master
           context: NuGet
-            
