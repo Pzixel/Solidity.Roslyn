@@ -98,6 +98,16 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal(testStrings, result.Select(Encoding.ASCII.GetString));
         }
 
+        [Fact]
+        public async Task Should_ReturnMultiple()
+        {
+            var sample = await GetSampleContract();
+
+            var result = await sample.ReturnMultipleAsync();
+            Assert.Single(result.Property1);
+            Assert.Equal(3, result.Property2.Count);
+        }
+
         private async Task<SampleContract> GetSampleContract()
         {
             var sample = await SampleContract.DeployAsync(Web3, X, Y);
