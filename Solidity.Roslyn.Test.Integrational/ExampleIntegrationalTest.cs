@@ -59,6 +59,17 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal(value, result);
         }
 
+        [Fact]
+        public async Task Should_TestTuplePartialNames()
+        {
+            var sample = await GetSampleContract();
+
+            var result = await sample.TestTuplePartialNamesAsync(10, 20, 30);
+            Assert.Equal(10, result.M);
+            Assert.Equal(20, result.N);
+            Assert.Equal(30, result.Property3);
+        }
+
         private async Task<SampleContract> GetSampleContract()
         {
             var sample = await SampleContract.DeployAsync(Web3, X, Y);
