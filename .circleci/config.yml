@@ -2,7 +2,7 @@
 jobs:
   build:
     docker:
-      - image: pzixel/solidity-dotnet:0.5.2
+      - image: pzixel/solidity-dotnet:latest
     working_directory: ~/Solidity.Roslyn
     steps:
       - checkout
@@ -17,7 +17,7 @@ jobs:
           command: dotnet test Solidity.Roslyn.Test
   deploy:
     docker:
-      - image: pzixel/solidity-dotnet:0.5.2
+      - image: pzixel/solidity-dotnet:latest
     working_directory: ~/Solidity.Roslyn            
     steps:
       - checkout
