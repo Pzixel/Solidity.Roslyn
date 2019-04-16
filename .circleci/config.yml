@@ -1,4 +1,4 @@
-version: 2
+﻿version: 2
 jobs:
   build:
     docker:
@@ -39,4 +39,3 @@ workflows:
             branches:
               only: master
           context: NuGet
-            

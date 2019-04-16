@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.2;
 
 contract Owned {
     address public owner;
@@ -22,7 +22,7 @@ contract SampleContract is Owned {
     uint64 public x;
     uint64 public y;
     uint public greetCount;
-    event Greet(uint indexed greetId, string text);
+    event greeting(uint indexed greetId, string text);
 
     constructor(uint64 x_, uint64 y_) public {
         owner = msg.sender;
@@ -37,7 +37,7 @@ contract SampleContract is Owned {
         require (a == b);
     }
 
-    function testSimpleValue(int a) public pure returns (int) {
+    function identity(int a) public pure returns (int) {
         return a;
     }
 
@@ -45,17 +45,19 @@ contract SampleContract is Owned {
         return (int16(a), int32(b), int64(d));
     }
 
-    function receiveMultiple(uint64[] xs, bytes32[] ys) public pure {
+    function receiveMultiple(uint64[] memory xs, bytes32[] memory ys) public pure returns (bytes32[] memory) {
         require (xs.length > 0);
         require (ys.length > 0);
+
+        return ys;
     }
 
-    function returnMultiple() public pure returns (uint64[], bytes32[]) {
+    function returnMultiple() public pure returns (uint64[] memory, bytes32[] memory) {
         return (new uint64[](1), new bytes32[](3));
     }
 
     function greet() public {
-        emit Greet(greetCount, "Hello");
+        emit greeting(greetCount, "Hello");
         greetCount++;
     }
 }
