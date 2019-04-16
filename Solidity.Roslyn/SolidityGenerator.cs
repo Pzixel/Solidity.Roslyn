@@ -154,7 +154,7 @@ namespace Solidity.Roslyn
                 var outputTypes = new List<MemberDeclarationSyntax>();
 
                 bool hasCtor = false;
-                var methods = abis.Select(abi =>
+                var methods = abis.SelectMany(abi =>
                 {
                     var inputParameters = abi.Inputs.Select((input,
                                                              i) => new ParameterDescription(Decapitalize(input.Name.Trim('_')),
@@ -197,7 +197,7 @@ namespace Solidity.Roslyn
                     {
                         case MemberType.Constructor:
                             hasCtor = true;
-                            return GetDeployDeclaration(web3Identifier,
+                            return GetDeployDeclarations(web3Identifier,
                                                              methodParameters,
                                                              contractClassDeclaration,
                                                              abiIdentifier,
@@ -206,25 +206,34 @@ namespace Solidity.Roslyn
                         case MemberType.Function:
                             if (outputParameters.Length > 0)
                             {
-                                return GetCallMethodDeclarationSyntax(outputParameters,
-                                                                      contract,
-                                                                      abi,
-                                                                      outputTypes,
-                                                                      methodParameters,
-                                                                      callParameters,
-                                                                      contractProperty);
-                            }
-
-                            return GetSendTxMethodDeclarationSyntax(callParameters,
-                                                                    abi,
-                                                                    methodParameters,
-                                                                    contractProperty);
-                        case MemberType.Event:
-                            return GetEventMethodDeclarationSyntax(inputParameters,
+                                return new[]
+                                {
+                                    GetCallMethodDeclarationSyntax(outputParameters,
                                                                    contract,
                                                                    abi,
                                                                    outputTypes,
-                                                                   contractProperty);
+                                                                   methodParameters,
+                                                                   callParameters,
+                                                                   contractProperty)
+                                };
+                            }
+
+                            return new[]
+                            {
+                                GetSendTxMethodDeclarationSyntax(callParameters,
+                                                                 abi,
+                                                                 methodParameters,
+                                                                 contractProperty)
+                            };
+                        case MemberType.Event:
+                            return new []
+                            {
+                                GetEventMethodDeclarationSyntax(inputParameters,
+                                                                contract,
+                                                                abi,
+                                                                outputTypes,
+                                                                contractProperty)
+                            };
                         default:
                             throw new InvalidEnumArgumentException("Type",
                                                                    (int) abi.Type,
@@ -234,7 +243,7 @@ namespace Solidity.Roslyn
 
                 if (!hasCtor)
                 {
-                    methods.Add(GetDeployDeclaration(web3Identifier,
+                    methods.AddRange(GetDeployDeclarations(web3Identifier,
                                                      Array.Empty<ParameterSyntax>(),
                                                      contractClassDeclaration,
                                                      abiIdentifier,
@@ -564,7 +573,7 @@ namespace Solidity.Roslyn
             return methodDeclarationSyntax;
         }
 
-        private static MethodDeclarationSyntax GetDeployDeclaration(SyntaxToken web3Identifier,
+        private static IEnumerable<MethodDeclarationSyntax> GetDeployDeclarations(SyntaxToken web3Identifier,
                                                                          ParameterSyntax[] methodParameters,
                                                                          ClassDeclarationSyntax contractClassDeclaration,
                                                                          SyntaxToken abiIdentifier,
@@ -585,12 +594,13 @@ namespace Solidity.Roslyn
             var deploymentResultType = GenericName(
                     "DeploymentResult")
                 .AddTypeArgumentListArguments(IdentifierName(contractClassDeclaration.Identifier));
-            return MethodDeclaration(
+            const string deployAndGetReceiptAsyncMethodName = "DeployAndGetReceiptAsync";
+            yield return MethodDeclaration(
                     GenericName(
                             Identifier("Task"))
                         .AddTypeArgumentListArguments(
                             deploymentResultType),
-                    Identifier("DeployAsync"))
+                    Identifier(deployAndGetReceiptAsyncMethodName))
                 .AddModifiers(
                     Token(SyntaxKind.PublicKeyword),
                     Token(SyntaxKind.StaticKeyword),
@@ -653,6 +663,49 @@ namespace Solidity.Roslyn
                             .AddArgumentListArguments(
                                 Argument(IdentifierName(deployedContractSyntaxToken)),
                                 Argument(IdentifierName(receiptSyntaxToken)))));
+
+            var arguments = constructorParameters.Select(x => Argument(IdentifierName(x.Identifier)))
+                                                 .ToArray();
+
+            yield return MethodDeclaration(
+                             GenericName(
+                                     Identifier("Task"))
+                                 .AddTypeArgumentListArguments(
+                                     IdentifierName(contractClassDeclaration.Identifier)),
+                             Identifier("DeployAsync"))
+                         .AddModifiers(
+                             Token(SyntaxKind.PublicKeyword),
+                             Token(SyntaxKind.StaticKeyword))
+                         .AddParameterListParameters(
+                             constructorParameters)
+                .WithExpressionBody(
+                    ArrowExpressionClause(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                InvocationExpression(
+                                    IdentifierName("DeployAndGetReceiptAsync"))
+                                .WithArgumentList(
+                                    ArgumentList(
+                                        SeparatedList(
+                                            arguments))),
+                                IdentifierName("ContinueWith")))
+                        .WithArgumentList(
+                            ArgumentList(
+                                SingletonSeparatedList(
+                                    Argument(
+                                        SimpleLambdaExpression(
+                                            Parameter(
+                                                Identifier("r")),
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    IdentifierName("r"),
+                                                    IdentifierName("Result")),
+                                                IdentifierName("Value")))))))))
+                .WithSemicolonToken(
+                    Token(SyntaxKind.SemicolonToken));
         }
 
         private static string Capitalize(string value) => string.IsNullOrEmpty(value) ? value : $"{char.ToUpper(value[0])}{value.Substring(1)}";

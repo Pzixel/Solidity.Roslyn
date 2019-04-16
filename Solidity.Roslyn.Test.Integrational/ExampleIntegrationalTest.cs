@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Nethereum.Web3;
+using Solidity.Roslyn.Core;
 using Solidity.Roslyn.Example.Sample;
 using Xunit;
 
@@ -26,11 +27,24 @@ namespace Solidity.Roslyn.Test.Integrational
                                                           xValue,
                                                           yValue);
 
-            ulong x = await sample.Value.XAsync();
-            ulong y = await sample.Value.YAsync();
+            ulong x = await sample.XAsync();
+            ulong y = await sample.YAsync();
 
             Assert.Equal(xValue, x);
             Assert.Equal(yValue, y);
+        }
+
+        [Fact]
+        public async Task Should_ThrowExceptions()
+        {
+            const ulong xValue = 10;
+            const ulong yValue = 20;
+
+            var sample = await SampleContract.DeployAsync(Web3, xValue, yValue);
+
+            await sample.ThrowIfNotEqualAsync(5, 5);
+
+            await Assert.ThrowsAsync<TransactionFailedException>(() => sample.ThrowIfNotEqualAsync(5, 30));
         }
     }
 }
