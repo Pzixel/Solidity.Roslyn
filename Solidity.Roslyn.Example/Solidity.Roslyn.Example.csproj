@@ -10,7 +10,7 @@
 
     <DotNetCliToolReference Include="dotnet-codegen" Version="0.4.88" />
 
-    <ProjectReference Include="..\Solidity.Core\Solidity.Core.csproj" />
+    <ProjectReference Include="..\Solidity.Roslyn.Core\Solidity.Roslyn.Core.csproj" />
 
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
   </ItemGroup>
