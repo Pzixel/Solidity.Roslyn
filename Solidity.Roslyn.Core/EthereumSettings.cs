@@ -1,6 +1,6 @@
 ﻿using Nethereum.Hex.HexTypes;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     public static class EthereumSettings
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using Nethereum.RPC.Eth.DTOs;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     public class TransactionFailedException : Exception
     {

@@ -2,9 +2,10 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Nethereum.RPC.Eth.DTOs;
+using Nethereum.RPC.Eth.Exceptions;
 using Nethereum.Web3;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     [DebuggerDisplay("{" + nameof(Address) + "}")]
     public abstract class ContractBase : IEquatable<ContractBase>
@@ -83,12 +84,22 @@ namespace Solidity.Roslyn
 
         public static bool IsEmptyAddress(string address) => string.IsNullOrEmpty(address) || address == EmptyAddress;
 
-        protected static Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string bin, object[] arguments) =>
-            web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(
-                abi,
-                bin,
-                web3.TransactionManager.Account.Address,
-                EthereumSettings.DeploymentGas,
-                values: arguments);
+        protected static async Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string contractByteCode, params object[] values)
+        {
+            try
+            {
+                var receipt = await web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(
+                                  abi,
+                                  contractByteCode,
+                                  web3.TransactionManager.Account.Address,
+                                  EthereumSettings.DeploymentGas,
+                                  values: values);
+                return receipt;
+            }
+            catch (ContractDeploymentException ex) when (ex.TransactionReceipt.Status.Value == 1)
+            {
+                return ex.TransactionReceipt;
+            }
+        }
     }
 }

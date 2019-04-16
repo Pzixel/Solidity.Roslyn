@@ -1,6 +1,6 @@
 ﻿using Nethereum.RPC.Eth.DTOs;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     public struct DeploymentResult<T> where T : ContractBase
     {

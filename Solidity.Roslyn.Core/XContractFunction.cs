@@ -4,7 +4,7 @@ using Nethereum.Contracts;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     public static class XContractFunction
     {

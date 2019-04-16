@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Solidity.Roslyn
+namespace Solidity.Roslyn.Core
 {
     public interface IEthereumHandler
     {
