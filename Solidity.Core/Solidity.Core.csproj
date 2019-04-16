@@ -4,10 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Nethereum.ABI" Version="2.5.1" />
-    <PackageReference Include="Nethereum.Generators" Version="1.0.1">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Nethereum.Web3" Version="2.5.1" />
+    <PackageReference Include="Nethereum.ABI" Version="3.2.0" />
+    <PackageReference Include="Nethereum.Web3" Version="3.2.0" />
   </ItemGroup>
 </Project>

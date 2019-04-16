@@ -22,7 +22,7 @@ contract SampleContract is Owned {
     uint64 public x;
     uint64 public y;
     uint public greetCount;
-    event Greet(uint indexed greetId, string text);
+    event greeting(uint indexed greetId, string text);
 
     constructor(uint64 x_, uint64 y_) public {
         owner = msg.sender;
@@ -55,7 +55,7 @@ contract SampleContract is Owned {
     }
 
     function greet() public {
-        emit Greet(greetCount, "Hello");
+        emit greeting(greetCount, "Hello");
         greetCount++;
     }
 }

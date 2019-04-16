@@ -156,14 +156,14 @@ namespace Solidity.Roslyn
                 var methods = abis.Select(abi =>
                 {
                     var inputParameters = abi.Inputs.Select((input,
-                                                             i) => new ParameterDescription(input.Name,
+                                                             i) => new ParameterDescription(Decapitalize(input.Name.Trim('_')),
                                                                                             typeConverter.Convert(input.Type),
                                                                                             input.Type,
                                                                                             $"parameter{i + 1}",
                                                                                             input.Indexed))
                         .ToArray();
                     var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output,
-                                                                                             i) => new ParameterDescription(output.Name,
+                                                                                             i) => new ParameterDescription(Capitalize(output.Name),
                                                                                                                             typeConverter.Convert(output.Type,
                                                                                                                                                   outputArrayAsList: true),
                                                                                                                             output.Type,
@@ -347,7 +347,22 @@ namespace Solidity.Roslyn
                                             default(TypeParameterListSyntax),
                                             default(BaseListSyntax),
                                             default(SyntaxList<TypeParameterConstraintClauseSyntax>),
-                                            List(members));
+                                            List(members))
+                           .AddBaseListTypes(
+                               SimpleBaseType(
+                                   IdentifierName("IEventDTO")))
+                           .WithAttributeLists(
+                               SingletonList(
+                                   AttributeList(
+                                       SingletonSeparatedList(
+                                           Attribute(
+                                                   IdentifierName("EventAttribute"))
+                                               .AddArgumentListArguments(AttributeArgument(
+                                                                             LiteralExpression(
+                                                                                 SyntaxKind
+                                                                                     .StringLiteralExpression,
+                                                                                 Literal(
+                                                                                     abi.Name))))))));
 
             outputTypes.Add(eventDto);
 
@@ -363,16 +378,18 @@ namespace Solidity.Roslyn
                         InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName(contractProperty),
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName("Web3"),
+                                        IdentifierName("Eth")),
                                     GenericName("GetEvent")
                                         .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier))))
                             .WithArgumentList(
                                 ArgumentList(
                                     SingletonSeparatedList(
                                         Argument(
-                                            LiteralExpression(
-                                                SyntaxKind.StringLiteralExpression,
-                                                Literal(abi.Name))))))))
+                                            IdentifierName(
+                                                "Address")))))))
                 .WithSemicolonToken(
                     Token(SyntaxKind.SemicolonToken));
         }
@@ -620,7 +637,8 @@ namespace Solidity.Roslyn
                                 Argument(IdentifierName(receiptSyntaxToken)))));
         }
 
-        private static string Capitalize(string value) => $"{char.ToUpper(value[0])}{value.Substring(1)}";
+        private static string Capitalize(string value) => string.IsNullOrEmpty(value) ? value : $"{char.ToUpper(value[0])}{value.Substring(1)}";
+        private static string Decapitalize(string value) => string.IsNullOrEmpty(value) ? value : $"{char.ToLower(value[0])}{value.Substring(1)}";
 
         private struct ParameterDescription
         {
@@ -636,7 +654,7 @@ namespace Solidity.Roslyn
                                         bool indexed)
             {
                 Name = !string.IsNullOrEmpty(name)
-                           ? Capitalize(name)
+                           ? name
                            : missingReplacement;
                 Type = type;
                 OriginalType = originalType;
