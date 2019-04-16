@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 using Solidity.Roslyn.Core;
 using Solidity.Roslyn.Example.Sample;
@@ -106,6 +107,27 @@ namespace Solidity.Roslyn.Test.Integrational
             var result = await sample.ReturnMultipleAsync();
             Assert.Single(result.Property1);
             Assert.Equal(3, result.Property2.Count);
+        }
+
+        [Fact]
+        public async Task Should_Greet()
+        {
+            var sample = await GetSampleContract();
+
+            var mostRecentBlockBeforeIndexingStarted = await Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var countBefore = await sample.GreetCountAsync();
+            await sample.GreetAsync();
+            var countAfter = await sample.GreetCountAsync();
+            var greetEvent = sample.GetGreetingEvent();
+            var eventLogs = await greetEvent.GetAllChanges(
+                                greetEvent.CreateFilterInput(
+                                    fromBlock: new BlockParameter(mostRecentBlockBeforeIndexingStarted)));
+
+            Assert.Equal(0, countBefore);
+            Assert.Equal(1, countAfter);
+            Assert.Single(eventLogs);
+            Assert.Equal(0, eventLogs[0].Event.GreetId);
+            Assert.Equal("Hello", eventLogs[0].Event.Text);
         }
 
         private async Task<SampleContract> GetSampleContract()
