@@ -21,12 +21,12 @@ namespace Solidity.Roslyn.Core
 
             if (IsEmptyAddress(address))
             {
-                throw new ArgumentException($"Address '{address}' is empty");
+                throw new ArgumentException($"Cannot create contract for empty address '{address}'");
             }
 
             Web3 = web3 ?? throw new ArgumentNullException(nameof(web3));
-            Contract = Web3.Eth.GetContract(abi, Address);
             Address = address;
+            Contract = Web3.Eth.GetContract(abi, address);
         }
 
         protected Web3 Web3 { get; }

@@ -14,4 +14,7 @@
 
     <ProjectReference Include="..\Solidity.Roslyn\Solidity.Roslyn.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <CustomAdditionalCompileInputs Include="**\*.sol" />
+  </ItemGroup>
 </Project>
