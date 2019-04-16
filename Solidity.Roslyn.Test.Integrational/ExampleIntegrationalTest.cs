@@ -23,9 +23,7 @@ namespace Solidity.Roslyn.Test.Integrational
             const ulong xValue = 10;
             const ulong yValue = 20;
 
-            var sample = await SampleContract.DeployAsync(Web3,
-                                                          xValue,
-                                                          yValue);
+            var sample = await SampleContract.DeployAsync(Web3, xValue, yValue);
 
             ulong x = await sample.XAsync();
             ulong y = await sample.YAsync();
