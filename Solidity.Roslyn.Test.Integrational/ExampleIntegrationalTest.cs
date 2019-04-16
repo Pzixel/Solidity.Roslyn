@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Numerics;
+using System.Threading.Tasks;
 using Nethereum.Web3;
 using Solidity.Roslyn.Core;
 using Solidity.Roslyn.Example.Sample;
@@ -8,6 +9,8 @@ namespace Solidity.Roslyn.Test.Integrational
 {
     public class ExampleIntegrationalTest
     {
+        private const ulong X = 10;
+        private const ulong Y = 20;
         private readonly Web3 Web3;
 
         public ExampleIntegrationalTest()
@@ -20,29 +23,46 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_Deploy()
         {
-            const ulong xValue = 10;
-            const ulong yValue = 20;
-
-            var sample = await SampleContract.DeployAsync(Web3, xValue, yValue);
+            var sample = await GetSampleContract();
 
             ulong x = await sample.XAsync();
             ulong y = await sample.YAsync();
 
-            Assert.Equal(xValue, x);
-            Assert.Equal(yValue, y);
+            Assert.Equal(X, x);
+            Assert.Equal(Y, y);
+        }
+
+        [Fact]
+        public async Task Should_CallEmptyMethod()
+        {
+            var sample = await GetSampleContract();
+
+            await sample.NoParamsAsync();
         }
 
         [Fact]
         public async Task Should_ThrowExceptions()
         {
-            const ulong xValue = 10;
-            const ulong yValue = 20;
-
-            var sample = await SampleContract.DeployAsync(Web3, xValue, yValue);
+            var sample = await GetSampleContract();
 
             await sample.ThrowIfNotEqualAsync(5, 5);
-
             await Assert.ThrowsAsync<TransactionFailedException>(() => sample.ThrowIfNotEqualAsync(5, 30));
+        }
+
+        [Fact]
+        public async Task Should_CallIdentity()
+        {
+            var sample = await GetSampleContract();
+
+            var value = new BigInteger(100500);
+            var result = await sample.IdentityAsync(value);
+            Assert.Equal(value, result);
+        }
+
+        private async Task<SampleContract> GetSampleContract()
+        {
+            var sample = await SampleContract.DeployAsync(Web3, X, Y);
+            return sample;
         }
     }
 }

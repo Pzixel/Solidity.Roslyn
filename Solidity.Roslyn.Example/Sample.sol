@@ -37,7 +37,7 @@ contract SampleContract is Owned {
         require (a == b);
     }
 
-    function testSimpleValue(int a) public pure returns (int) {
+    function identity(int a) public pure returns (int) {
         return a;
     }
 
@@ -45,9 +45,11 @@ contract SampleContract is Owned {
         return (int16(a), int32(b), int64(d));
     }
 
-    function receiveMultiple(uint64[] memory xs, bytes32[] memory ys) public pure {
+    function receiveMultiple(uint64[] memory xs, bytes32[] memory ys) public pure returns (bytes32[] memory) {
         require (xs.length > 0);
         require (ys.length > 0);
+
+        return ys;
     }
 
     function returnMultiple() public pure returns (uint64[] memory, bytes32[] memory) {
