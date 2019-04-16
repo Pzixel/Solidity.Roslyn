@@ -153,6 +153,7 @@ namespace Solidity.Roslyn
 
                 var outputTypes = new List<MemberDeclarationSyntax>();
 
+                bool hasCtor = false;
                 var methods = abis.Select(abi =>
                 {
                     var inputParameters = abi.Inputs.Select((input,
@@ -195,7 +196,8 @@ namespace Solidity.Roslyn
                     switch (abi.Type)
                     {
                         case MemberType.Constructor:
-                            return GetConstructorDeclaration(web3Identifier,
+                            hasCtor = true;
+                            return GetDeployDeclaration(web3Identifier,
                                                              methodParameters,
                                                              contractClassDeclaration,
                                                              abiIdentifier,
@@ -228,7 +230,17 @@ namespace Solidity.Roslyn
                                                                    (int) abi.Type,
                                                                    typeof(MemberType));
                     }
-                });
+                }).ToList();
+
+                if (!hasCtor)
+                {
+                    methods.Add(GetDeployDeclaration(web3Identifier,
+                                                     Array.Empty<ParameterSyntax>(),
+                                                     contractClassDeclaration,
+                                                     abiIdentifier,
+                                                     binIdentifier,
+                                                     Array.Empty<IdentifierNameSyntax>()));
+                }
 
                 var classDeclarationWithMethods = contractClassDeclaration.AddMembers(methods.Cast<MemberDeclarationSyntax>()
                                                                                           .ToArray());
@@ -552,7 +564,7 @@ namespace Solidity.Roslyn
             return methodDeclarationSyntax;
         }
 
-        private static MethodDeclarationSyntax GetConstructorDeclaration(SyntaxToken web3Identifier,
+        private static MethodDeclarationSyntax GetDeployDeclaration(SyntaxToken web3Identifier,
                                                                          ParameterSyntax[] methodParameters,
                                                                          ClassDeclarationSyntax contractClassDeclaration,
                                                                          SyntaxToken abiIdentifier,
