@@ -23,7 +23,13 @@ jobs:
       - checkout
       - run:
           name: pack
+          command: dotnet pack Solidity.Roslyn.Core --configuration=Release --include-symbols --output nupkgs
+      - run:
+          name: pack
           command: dotnet pack Solidity.Roslyn --configuration=Release --include-symbols --output nupkgs
+      - run:
+          name: deploy
+          command: dotnet nuget push Solidity.Roslyn.Core/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://www.nuget.org
       - run:
           name: deploy
           command: dotnet nuget push Solidity.Roslyn/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://www.nuget.org
