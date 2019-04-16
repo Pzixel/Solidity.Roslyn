@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2037
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Test", "Solidity.Roslyn.Test\Solidity.Roslyn.Test.csproj", "{D33C0355-C15E-4473-A970-0019DE16A155}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn", "Solidity.Roslyn\Solidity.Roslyn.csproj", "{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solidity.Roslyn.Example", "Solidity.Roslyn.Example\Solidity.Roslyn.Example.csproj", "{78A34A43-489D-4F17-BD3A-4E6CB89E6134}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Example", "Solidity.Roslyn.Example\Solidity.Roslyn.Example.csproj", "{78A34A43-489D-4F17-BD3A-4E6CB89E6134}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solidity.Core", "Solidity.Core\Solidity.Core.csproj", "{116826E3-9ABF-47D9-BAE6-989F0A6238F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.Build.0 = Release|Any CPU
+		{116826E3-9ABF-47D9-BAE6-989F0A6238F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{116826E3-9ABF-47D9-BAE6-989F0A6238F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{116826E3-9ABF-47D9-BAE6-989F0A6238F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{116826E3-9ABF-47D9-BAE6-989F0A6238F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

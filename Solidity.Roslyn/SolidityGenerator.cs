@@ -11,13 +11,6 @@ using CodeGeneration.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.Contracts;
-using Nethereum.Generators.Core;
-using Nethereum.RPC.Accounts;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.RPC.TransactionManagers;
-using Nethereum.Web3;
 using Newtonsoft.Json;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -130,7 +123,7 @@ namespace Solidity.Roslyn
                                 Parameter(
                                         web3Identifier)
                                     .WithType(
-                                        IdentifierName(nameof(Web3))),
+                                        IdentifierName("Web3")),
                                 Parameter(
                                         addressIdentifier)
                                     .WithType(
@@ -154,7 +147,7 @@ namespace Solidity.Roslyn
                                 Block()))
                     .AddBaseListTypes(
                         SimpleBaseType(
-                            IdentifierName(nameof(ContractBase))));
+                            IdentifierName("ContractBase")));
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
 
@@ -172,7 +165,7 @@ namespace Solidity.Roslyn
                     var outputParameters = (abi.Outputs ?? Array.Empty<Parameter>()).Select((output,
                                                                                              i) => new ParameterDescription(output.Name,
                                                                                                                             typeConverter.Convert(output.Type,
-                                                                                                                                                  true),
+                                                                                                                                                  outputArrayAsList: true),
                                                                                                                             output.Type,
                                                                                                                             $"Property{i + 1}",
                                                                                                                             output.Indexed))
@@ -231,7 +224,7 @@ namespace Solidity.Roslyn
                                                                    outputTypes,
                                                                    contractProperty);
                         default:
-                            throw new InvalidEnumArgumentException(nameof(abi.Type),
+                            throw new InvalidEnumArgumentException("Type",
                                                                    (int) abi.Type,
                                                                    typeof(MemberType));
                     }
@@ -246,43 +239,43 @@ namespace Solidity.Roslyn
                     .AddUsings(UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
-                                           IdentifierName(nameof(System)),
-                                           IdentifierName(nameof(System.Collections))),
-                                       IdentifierName(nameof(System.Collections.Generic)))),
+                                           IdentifierName("System"),
+                                           IdentifierName("Collections")),
+                                       IdentifierName("Generic"))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName(nameof(System)),
-                                       IdentifierName(nameof(System.Numerics)))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           IdentifierName(nameof(System)),
-                                           IdentifierName(nameof(System.Threading))),
-                                       IdentifierName(nameof(System.Threading.Tasks)))),
+                                       IdentifierName("System"),
+                                       IdentifierName("Numerics"))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
-                                           QualifiedName(
-                                               IdentifierName(nameof(Nethereum)),
-                                               IdentifierName(nameof(Nethereum.ABI))),
-                                           IdentifierName(nameof(Nethereum.ABI.FunctionEncoding))),
-                                       IdentifierName(nameof(Nethereum.ABI.FunctionEncoding.Attributes)))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       IdentifierName(nameof(Nethereum)),
-                                       IdentifierName(nameof(Nethereum.Contracts)))),
+                                           IdentifierName("System"),
+                                           IdentifierName("Threading")),
+                                       IdentifierName("Tasks"))),
                                UsingDirective(
                                    QualifiedName(
                                        QualifiedName(
                                            QualifiedName(
-                                               IdentifierName(nameof(Nethereum)),
-                                               IdentifierName(nameof(Nethereum.RPC))),
-                                           IdentifierName(nameof(Nethereum.RPC.Eth))),
-                                       IdentifierName(nameof(Nethereum.RPC.Eth.DTOs)))),
+                                               IdentifierName("Nethereum"),
+                                               IdentifierName("ABI")),
+                                           IdentifierName("FunctionEncoding")),
+                                       IdentifierName("Attributes"))),
                                UsingDirective(
                                    QualifiedName(
-                                       IdentifierName(nameof(Nethereum)),
-                                       IdentifierName(nameof(Nethereum.Web3)))))
+                                       IdentifierName("Nethereum"),
+                                       IdentifierName("Contracts"))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       QualifiedName(
+                                           QualifiedName(
+                                               IdentifierName("Nethereum"),
+                                               IdentifierName("RPC")),
+                                           IdentifierName("Eth")),
+                                       IdentifierName("DTOs"))),
+                               UsingDirective(
+                                   QualifiedName(
+                                       IdentifierName("Nethereum"),
+                                       IdentifierName("Web3"))))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
 
@@ -313,7 +306,7 @@ namespace Solidity.Roslyn
                                     AttributeList(
                                         SingletonSeparatedList(
                                             Attribute(
-                                                    IdentifierName(nameof(ParameterAttribute)))
+                                                    IdentifierName("ParameterAttribute"))
                                                 .AddArgumentListArguments(
                                                     AttributeArgument(
                                                         LiteralExpression(
@@ -359,7 +352,7 @@ namespace Solidity.Roslyn
             outputTypes.Add(eventDto);
 
             return MethodDeclaration(
-                    GenericName(nameof(Event))
+                    GenericName("Event")
                         .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier)),
                     Identifier($"Get{Capitalize(abi.Name)}Event"))
                 .WithModifiers(
@@ -371,7 +364,7 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName(contractProperty),
-                                    GenericName(nameof(Nethereum.Contracts.Contract.GetEvent))
+                                    GenericName("GetEvent")
                                         .AddTypeArgumentListArguments(IdentifierName(eventDto.Identifier))))
                             .WithArgumentList(
                                 ArgumentList(
@@ -399,17 +392,17 @@ namespace Solidity.Roslyn
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     IdentifierName("Web3"),
-                                    IdentifierName(nameof(Web3.TransactionManager))),
-                                IdentifierName(nameof(ITransactionManager.Account))),
-                            IdentifierName(nameof(IAccount.Address))))
+                                    IdentifierName("TransactionManager")),
+                                IdentifierName("Account")),
+                            IdentifierName("Address")))
                 }.Concat(callParameters)
                 .ToArray();
 
             return MethodDeclaration(
                     GenericName(
-                            Identifier(nameof(Task)))
+                            Identifier("Task"))
                         .AddTypeArgumentListArguments(
-                            IdentifierName(nameof(TransactionReceipt))),
+                            IdentifierName("TransactionReceipt")),
                     Identifier(Capitalize(abi.Name) + "Async"))
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
@@ -423,13 +416,13 @@ namespace Solidity.Roslyn
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 IdentifierName(contractProperty),
-                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
+                                                IdentifierName("GetFunction")))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
                                                     SyntaxKind.StringLiteralExpression,
                                                     Literal(abi.Name)))),
-                                    IdentifierName(nameof(XContractFunction.SendDefaultTransactionAndWaitForReceiptAsync))))
+                                    IdentifierName("SendDefaultTransactionAndWaitForReceiptAsync")))
                             .AddArgumentListArguments(
                                 sendTxCallParameters)))
                 .WithSemicolonToken(
@@ -451,7 +444,7 @@ namespace Solidity.Roslyn
             {
                 outputType = Identifier(outputParameters.Single()
                                             .Type);
-                methodName = nameof(Function.CallAsync);
+                methodName = "CallAsync";
             }
             else
             {
@@ -462,7 +455,7 @@ namespace Solidity.Roslyn
                             AttributeList(
                                 SingletonSeparatedList(
                                     Attribute(
-                                        IdentifierName(nameof(FunctionOutputAttribute)))))))
+                                        IdentifierName("FunctionOutputAttribute"))))))
                     .AddMembers(outputParameters
                                     .Select((output,
                                              i) => PropertyDeclaration(IdentifierName(output.Type),
@@ -472,7 +465,7 @@ namespace Solidity.Roslyn
                                                         AttributeList(
                                                             SingletonSeparatedList(
                                                                 Attribute(
-                                                                        IdentifierName(nameof(ParameterAttribute)))
+                                                                        IdentifierName("ParameterAttribute"))
                                                                     .AddArgumentListArguments(AttributeArgument(
                                                                                                   LiteralExpression(
                                                                                                       SyntaxKind
@@ -500,12 +493,12 @@ namespace Solidity.Roslyn
                 outputTypes.Add(outputTypeClass);
 
                 outputType = outputTypeClass.Identifier;
-                methodName = nameof(Function.CallDeserializingToObjectAsync);
+                methodName = "CallDeserializingToObjectAsync";
             }
 
             var methodDeclarationSyntax = MethodDeclaration(
                     GenericName(
-                            Identifier(nameof(Task)))
+                            Identifier("Task"))
                         .AddTypeArgumentListArguments(
                             IdentifierName(outputType)),
                     Identifier(Capitalize(abi.Name) + "Async"))
@@ -520,7 +513,7 @@ namespace Solidity.Roslyn
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 IdentifierName(contractProperty),
-                                                IdentifierName(nameof(Nethereum.Contracts.Contract.GetFunction))))
+                                                IdentifierName("GetFunction")))
                                         .AddArgumentListArguments(
                                             Argument(
                                                 LiteralExpression(
@@ -548,18 +541,18 @@ namespace Solidity.Roslyn
                     Parameter(
                             web3Identifier)
                         .WithType(
-                            IdentifierName(nameof(Web3)))
+                            IdentifierName("Web3"))
                 }.Concat(methodParameters)
                 .ToArray();
 
             var receiptSyntaxToken = Identifier("receipt");
             var deployedContractSyntaxToken = Identifier("deployedContract");
             var deploymentResultType = GenericName(
-                    nameof(DeploymentResult<ContractBase>))
+                    "DeploymentResult")
                 .AddTypeArgumentListArguments(IdentifierName(contractClassDeclaration.Identifier));
             return MethodDeclaration(
                     GenericName(
-                            Identifier(nameof(Task)))
+                            Identifier("Task"))
                         .AddTypeArgumentListArguments(
                             deploymentResultType),
                     Identifier("DeployAsync"))
@@ -582,7 +575,7 @@ namespace Solidity.Roslyn
                                                 InvocationExpression(
                                                         MemberAccessExpression(
                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                            IdentifierName(nameof(ContractBase)),
+                                                            IdentifierName("ContractBase"),
                                                             IdentifierName("DeployAsync")))
                                                     .AddArgumentListArguments(
                                                         Argument(
@@ -619,7 +612,7 @@ namespace Solidity.Roslyn
                                                                               MemberAccessExpression(
                                                                                   SyntaxKind.SimpleMemberAccessExpression,
                                                                                   IdentifierName(receiptSyntaxToken),
-                                                                                  IdentifierName(nameof(TransactionReceipt.ContractAddress))))))))),
+                                                                                  IdentifierName("ContractAddress")))))))),
                     ReturnStatement(
                         ObjectCreationExpression(deploymentResultType)
                             .AddArgumentListArguments(

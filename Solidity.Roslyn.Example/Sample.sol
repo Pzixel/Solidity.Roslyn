@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.2;
 
 contract Owned {
     address public owner;
@@ -45,12 +45,12 @@ contract SampleContract is Owned {
         return (int16(a), int32(b), int64(d));
     }
 
-    function receiveMultiple(uint64[] xs, bytes32[] ys) public pure {
+    function receiveMultiple(uint64[] memory xs, bytes32[] memory ys) public pure {
         require (xs.length > 0);
         require (ys.length > 0);
     }
 
-    function returnMultiple() public pure returns (uint64[], bytes32[]) {
+    function returnMultiple() public pure returns (uint64[] memory, bytes32[] memory) {
         return (new uint64[](1), new bytes32[](3));
     }
 
