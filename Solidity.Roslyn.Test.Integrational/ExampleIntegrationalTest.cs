@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System.Linq;
+using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 using Nethereum.Web3;
 using Solidity.Roslyn.Core;
@@ -41,6 +43,15 @@ namespace Solidity.Roslyn.Test.Integrational
         }
 
         [Fact]
+        public async Task Should_CallBase()
+        {
+            var sample = await GetSampleContract();
+
+            bool isDeployed = await sample.IsDeployedAsync();
+            Assert.True(isDeployed);
+        }
+
+        [Fact]
         public async Task Should_ThrowExceptions()
         {
             var sample = await GetSampleContract();
@@ -68,6 +79,23 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal(10, result.M);
             Assert.Equal(20, result.N);
             Assert.Equal(30, result.Property3);
+        }
+
+        [Fact]
+        public async Task Should_ReceiveMultiple()
+        {
+            var sample = await GetSampleContract();
+
+            var testStrings = Enumerable.Range(1, 10)
+                                  .Select(i => $"{new string('1', 29)}{i}")
+                                  .ToArray();
+            var result = await sample.ReceiveMultipleAsync(
+                             new ulong[] { 10, 20 },
+                             testStrings
+                                 .Select(Encoding.ASCII.GetBytes)
+                                 .ToArray());
+
+            Assert.Equal(testStrings, result.Select(Encoding.ASCII.GetString));
         }
 
         private async Task<SampleContract> GetSampleContract()
