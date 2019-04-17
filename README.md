@@ -53,4 +53,4 @@ Assert.Equal(Y, y);
 
 For more details see `Example` project
 
-
+Also you may find [Solidity code highlighter](https://github.com/Pzixel/Solidity/releases) useful
