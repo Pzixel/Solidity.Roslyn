@@ -24,10 +24,11 @@ contract SampleContract {
 }
 ```
 
-2. Reference `Solidity.Roslyn` and `Solidity.Roslyn.Core`
+2. Reference `Solidity.Roslyn`, `Solidity.Roslyn.Core` and required build packages
 ```powershell
 Install-Package Solidity.Roslyn
 Install-Package Solidity.Roslyn.Core
+Install-Package CodeGeneration.Roslyn.BuildTime -Version 0.4.88
 ```
 
 3. Add codegen attribute in the project
