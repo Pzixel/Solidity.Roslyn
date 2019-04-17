@@ -17,6 +17,7 @@ namespace Solidity.Roslyn
     public class Abi
     {
         public string Name { get; set; }
+        public bool Constant { get; set; }
         public MemberType Type { get; set; }
         public Parameter[] Inputs { get; set; }
         public Parameter[] Outputs { get; set; }

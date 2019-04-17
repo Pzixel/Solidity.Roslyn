@@ -204,7 +204,23 @@ namespace Solidity.Roslyn
                                                              binIdentifier,
                                                              initializerParameters);
                         case MemberType.Function:
-                            if (outputParameters.Length > 0)
+                            var sendTxCallParameters = new[]
+                                {
+                                    Argument(
+                                        MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    IdentifierName("Web3"),
+                                                    IdentifierName("TransactionManager")),
+                                                IdentifierName("Account")),
+                                            IdentifierName("Address")))
+                                }.Concat(callParameters)
+                                 .ToArray();
+
+                            if (abi.Constant)
                             {
                                 return new[]
                                 {
@@ -213,14 +229,14 @@ namespace Solidity.Roslyn
                                                                    abi,
                                                                    outputTypes,
                                                                    methodParameters,
-                                                                   callParameters,
+                                                                   sendTxCallParameters,
                                                                    contractProperty)
                                 };
                             }
 
                             return new[]
                             {
-                                GetSendTxMethodDeclarationSyntax(callParameters,
+                                GetSendTxMethodDeclarationSyntax(sendTxCallParameters,
                                                                  abi,
                                                                  methodParameters,
                                                                  contractProperty)
@@ -392,27 +408,11 @@ namespace Solidity.Roslyn
                     Token(SyntaxKind.SemicolonToken));
         }
 
-        private static MethodDeclarationSyntax GetSendTxMethodDeclarationSyntax(ArgumentSyntax[] callParameters,
+        private static MethodDeclarationSyntax GetSendTxMethodDeclarationSyntax(ArgumentSyntax[] sendTxCallParameters,
                                                                                 Abi abi,
                                                                                 ParameterSyntax[] methodParameters,
                                                                                 SyntaxToken contractProperty)
         {
-            var sendTxCallParameters = new[]
-                {
-                    Argument(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("Web3"),
-                                    IdentifierName("TransactionManager")),
-                                IdentifierName("Account")),
-                            IdentifierName("Address")))
-                }.Concat(callParameters)
-                .ToArray();
-
             return MethodDeclaration(
                     GenericName(
                             Identifier("Task"))
@@ -459,7 +459,7 @@ namespace Solidity.Roslyn
             {
                 outputType = Identifier(outputParameters.Single()
                                             .Type);
-                methodName = "CallAsync";
+                methodName = "CallDefaultAsync";
             }
             else
             {
@@ -508,7 +508,7 @@ namespace Solidity.Roslyn
                 outputTypes.Add(outputTypeClass);
 
                 outputType = outputTypeClass.Identifier;
-                methodName = "CallDeserializingToObjectAsync";
+                methodName = "CallDefaultDeserializingToObjectAsync";
             }
 
             var methodDeclarationSyntax = MethodDeclaration(

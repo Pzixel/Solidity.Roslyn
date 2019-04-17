@@ -8,6 +8,24 @@ namespace Solidity.Roslyn.Core
 {
     public static class XContractFunction
     {
+        public static Task<T> CallDefaultAsync<T>(this Function function,
+                                                  string accountAddress,
+                                                  params object[] functionInput) =>
+            function.CallAsync<T>(
+                accountAddress,
+                EthereumSettings.TxGas,
+                null,
+                functionInput);
+
+        public static Task<T> CallDefaultDeserializingToObjectAsync<T>(this Function function,
+                                                                       string accountAddress,
+                                                                       params object[] functionInput) where T : new() =>
+            function.CallDeserializingToObjectAsync<T>(
+                accountAddress,
+                EthereumSettings.TxGas,
+                null,
+                functionInput);
+
         public static async Task<TransactionReceipt> SendDefaultTransactionAndWaitForReceiptAsync(this Function function,
                                                                                                   string accountAddress,
                                                                                                   params object[] functionInput)

@@ -63,7 +63,7 @@ contract SampleContract is Owned {
     }
 
     function sideEffectFunctionWithReturnValue() public returns (uint) {
-        for (uint i = 0; i < 100000; i++) {
+        for (uint i = 0; i < 80000; i++) {
             callsCount++;
         }
         return callsCount;
