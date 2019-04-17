@@ -29,11 +29,9 @@ namespace Solidity.Roslyn.Core
             Contract = Web3.Eth.GetContract(abi, address);
         }
 
-        protected Web3 Web3 { get; }
-
+        public Web3 Web3 { get; }
         public string Address { get; }
-
-        protected Nethereum.Contracts.Contract Contract { get; }
+        public Nethereum.Contracts.Contract Contract { get; }
 
         public bool Equals(ContractBase other)
         {

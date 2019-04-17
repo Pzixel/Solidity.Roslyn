@@ -2,7 +2,7 @@
 
 namespace Solidity.Roslyn.Core
 {
-    public struct DeploymentResult<T> where T : ContractBase
+    public struct DeploymentResult<T>
     {
         public T Value { get; }
         public TransactionReceipt Receipt { get; }

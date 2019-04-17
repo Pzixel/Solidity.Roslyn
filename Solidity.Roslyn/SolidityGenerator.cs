@@ -257,52 +257,14 @@ namespace Solidity.Roslyn
                 var namespaceDeclaration = NamespaceDeclaration(
                         QualifiedName(GetQualifiedName(defaultNamespace),
                                       IdentifierName(namespaceName)))
-                    .AddUsings(UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           IdentifierName("System"),
-                                           IdentifierName("Collections")),
-                                       IdentifierName("Generic"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       IdentifierName("System"),
-                                       IdentifierName("Numerics"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           IdentifierName("System"),
-                                           IdentifierName("Threading")),
-                                       IdentifierName("Tasks"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           QualifiedName(
-                                               IdentifierName("Nethereum"),
-                                               IdentifierName("ABI")),
-                                           IdentifierName("FunctionEncoding")),
-                                       IdentifierName("Attributes"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       IdentifierName("Nethereum"),
-                                       IdentifierName("Contracts"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           QualifiedName(
-                                               IdentifierName("Nethereum"),
-                                               IdentifierName("RPC")),
-                                           IdentifierName("Eth")),
-                                       IdentifierName("DTOs"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       IdentifierName("Nethereum"),
-                                       IdentifierName("Web3"))),
-                               UsingDirective(
-                                   QualifiedName(
-                                       QualifiedName(
-                                           IdentifierName("Solidity"),
-                                           IdentifierName("Roslyn")),
-                                       IdentifierName("Core"))))
+                    .AddUsings(GetUsingDirective("System", "Collections", "Generic"),
+                               GetUsingDirective("System", "Numerics"),
+                               GetUsingDirective("System", "Threading", "Tasks"),
+                               GetUsingDirective("Nethereum", "ABI", "FunctionEncoding", "Attributes"),
+                               GetUsingDirective("Nethereum", "Contracts"),
+                               GetUsingDirective("Nethereum", "RPC", "Eth", "DTOs"),
+                               GetUsingDirective("Nethereum", "Web3"),
+                               GetUsingDirective("Solidity", "Roslyn", "Core"))
                     .AddMembers(classDeclarationWithMethods)
                     .AddMembers(outputTypes.ToArray());
 
@@ -311,6 +273,15 @@ namespace Solidity.Roslyn
 
             return Task.FromResult(List<MemberDeclarationSyntax>(results));
         }
+
+        private static UsingDirectiveSyntax GetUsingDirective(params string[] namespaces) =>
+            UsingDirective(
+                namespaces.Skip(1)
+                          .Aggregate((NameSyntax) AliasQualifiedName(
+                                         IdentifierName(
+                                             Token(SyntaxKind.GlobalKeyword)),
+                                         IdentifierName(namespaces.First())),
+                                     (syntax, s) => QualifiedName(syntax, IdentifierName(s))));
 
         private static NameSyntax GetQualifiedName(string dotSeparatedName)
         {
