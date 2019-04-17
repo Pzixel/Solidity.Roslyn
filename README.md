@@ -13,7 +13,7 @@ You can install it for your OS ([see instruction](https://solidity.readthedocs.i
 1. Create a new netstandard project and add solidity file with code
 
 ```solidity
-contract SampleContract{
+contract SampleContract {
     uint64 public x;
     uint64 public y;
 
@@ -25,6 +25,11 @@ contract SampleContract{
 ```
 
 2. Reference `Solidity.Roslyn` and `Solidity.Roslyn.Core`
+```powershell
+Install-Package Solidity.Roslyn
+Install-Package Solidity.Roslyn.Core
+```
+
 3. Add codegen attribute in the project
 
 ```cs
