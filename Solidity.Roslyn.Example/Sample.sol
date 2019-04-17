@@ -22,6 +22,7 @@ contract SampleContract is Owned {
     uint64 public x;
     uint64 public y;
     uint public greetCount;
+    uint callsCount;
     event greeting(uint indexed greetId, string text);
 
     constructor(uint64 x_, uint64 y_) public {
@@ -59,5 +60,12 @@ contract SampleContract is Owned {
     function greet() public {
         emit greeting(greetCount, "Hello");
         greetCount++;
+    }
+
+    function sideEffectFunctionWithReturnValue() public returns (uint) {
+        for (uint i = 0; i < 100000; i++) {
+            callsCount++;
+        }
+        return callsCount;
     }
 }
