@@ -22,17 +22,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: pack
+          name: pack Solidity.Roslyn.Core
           command: dotnet pack Solidity.Roslyn.Core --configuration=Release --include-symbols --output nupkgs
       - run:
-          name: pack
+          name: pack Solidity.Roslyn
           command: dotnet pack Solidity.Roslyn --configuration=Release --include-symbols --output nupkgs
       - run:
-          name: deploy
-          command: dotnet nuget push Solidity.Roslyn.Core/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://www.nuget.org
+          name: deploy Solidity.Roslyn.Core
+          command: dotnet nuget push Solidity.Roslyn.Core/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://api.nuget.org/v3/index.json
       - run:
-          name: deploy
-          command: dotnet nuget push Solidity.Roslyn/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://www.nuget.org
+          name: deploy Solidity.Roslyn
+          command: dotnet nuget push Solidity.Roslyn/nupkgs/*.nupkg -k $NUGETAPIKEY -s https://api.nuget.org/v3/index.json
 workflows:
   version: 2
   build-and-deploy:
