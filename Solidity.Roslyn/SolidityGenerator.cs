@@ -100,7 +100,7 @@ namespace Solidity.Roslyn
                 var classIdentifier = Identifier(contract);
 
                 string baseClass = inheritanceDictionary.TryGetValue(contract, out baseClass)
-                                    ? baseClass
+                                    ? Capitalize(baseClass)
                                     : "ContractBase";
 
                 var contractClassDeclaration = ClassDeclaration(classIdentifier)
