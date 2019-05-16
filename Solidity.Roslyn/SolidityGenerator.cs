@@ -20,7 +20,7 @@ namespace Solidity.Roslyn
     public class SolidityGenerator : ICodeGenerator
     {
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        public SolidityGenerator(AttributeData attributeData)
+        public SolidityGenerator(AttributeData _)
         {
         }
 
