@@ -26,7 +26,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_Deploy()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             ulong x = await sample.XAsync();
             ulong y = await sample.YAsync();
@@ -38,7 +38,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_CallEmptyMethod()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             await sample.NoParamsAsync();
         }
@@ -46,7 +46,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_CallBase()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             bool isDeployed = await sample.IsDeployedAsync();
             Assert.True(isDeployed);
@@ -55,7 +55,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_ThrowExceptions()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             await sample.ThrowIfNotEqualAsync(5, 5);
             await Assert.ThrowsAsync<TransactionFailedException>(() => sample.ThrowIfNotEqualAsync(5, 30));
@@ -64,7 +64,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_CallIdentity()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             var value = new BigInteger(100500);
             var result = await sample.IdentityAsync(value);
@@ -74,7 +74,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_TestTuplePartialNames()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             var result = await sample.TestTuplePartialNamesAsync(10, 20, 30);
             Assert.Equal(10, result.M);
@@ -85,7 +85,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_ReceiveMultiple()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             var testStrings = Enumerable.Range(1, 10)
                                   .Select(i => $"{new string('1', 29)}{i}")
@@ -102,7 +102,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_ReturnMultiple()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             var result = await sample.ReturnMultipleAsync();
             Assert.Single(result.Property1);
@@ -112,7 +112,7 @@ namespace Solidity.Roslyn.Test.Integrational
         [Fact]
         public async Task Should_Greet()
         {
-            var sample = await GetSampleContract();
+            var sample = await GetSampleContractAsync();
 
             var mostRecentBlockBeforeIndexingStarted = await Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
             var countBefore = await sample.GreetCountAsync();
@@ -130,6 +130,16 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal("Hello", eventLogs[0].Event.Text);
         }
 
-        private Task<SampleContract> GetSampleContract() => SampleContract.DeployAsync(Web3, X, Y);
+        [Fact]
+        public async Task Should_SupportSubtyping()
+        {
+            var sample = await GetSampleContractAsync();
+            var sampleAsBase = (Owned) sample;
+
+            Assert.Equal(await sample.IsDeployedAsync(), await sampleAsBase.IsDeployedAsync());
+            Assert.Equal(await sample.OwnerAsync(), await sampleAsBase.OwnerAsync());
+        }
+
+        private Task<SampleContract> GetSampleContractAsync() => SampleContract.DeployAsync(Web3, X, Y);
     }
 }
