@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeGeneration.Roslyn;
@@ -19,7 +20,7 @@ namespace Solidity.Roslyn
     public class SolidityGenerator : ICodeGenerator
     {
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        public SolidityGenerator(AttributeData attributeData)
+        public SolidityGenerator(AttributeData _)
         {
         }
 
@@ -49,7 +50,7 @@ namespace Solidity.Roslyn
                 }
             }
 
-            var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories);
+            var solidityFiles = Directory.EnumerateFiles(context.ProjectDirectory, "*.sol", SearchOption.AllDirectories).ToArray();
 
             string defaultNamespace = Path.GetFileName(context.ProjectDirectory);
 
@@ -71,6 +72,14 @@ namespace Solidity.Roslyn
                 return output;
             });
 
+            var sourceFiles = solidityFiles.Select(File.ReadAllText);
+            var inheritanceDictionary = sourceFiles.SelectMany(text => Regex.Matches(text, @"contract\s+(\w+)\s+is\s+(\w+)")
+                                                              .Cast<Match>())
+                                     .ToDictionary(m => Capitalize(m.Groups[1]
+                                                         .Value),
+                                                   m => m.Groups[2]
+                                                         .Value);
+
             var contracts = jsons.Select(JsonConvert.DeserializeObject<SolcOutput>).SelectMany(x => x.Contracts);
 
             var typeConverter = new ABITypeToCSharpType();
@@ -84,10 +93,15 @@ namespace Solidity.Roslyn
                 var abiIdentifier = Identifier("Abi");
                 var binIdentifier = Identifier("Bin");
                 var web3Identifier = Identifier("web3");
+                var abiParamIdentifier = Identifier("abi");
                 var contractProperty = Identifier("Contract");
                 var addressIdentifier = Identifier("address");
 
                 var classIdentifier = Identifier(contract);
+
+                string baseClass = inheritanceDictionary.TryGetValue(contract, out baseClass)
+                                    ? baseClass
+                                    : "ContractBase";
 
                 var contractClassDeclaration = ClassDeclaration(classIdentifier)
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
@@ -144,10 +158,45 @@ namespace Solidity.Roslyn
                                                     IdentifierName(addressIdentifier))
                                             }))))
                             .WithBody(
+                                Block()),
+                        ConstructorDeclaration(classIdentifier)
+                            .AddModifiers(
+                                Token(SyntaxKind.ProtectedKeyword))
+                            .AddParameterListParameters(
+                                Parameter(
+                                        web3Identifier)
+                                    .WithType(
+                                        IdentifierName("Web3")),
+                                Parameter(
+                                        abiParamIdentifier)
+                                    .WithType(
+                                        PredefinedType(
+                                            Token(SyntaxKind.StringKeyword))),
+                                Parameter(
+                                        addressIdentifier)
+                                    .WithType(
+                                        PredefinedType(
+                                            Token(SyntaxKind.StringKeyword))))
+                            .WithInitializer(
+                                ConstructorInitializer(
+                                    SyntaxKind.BaseConstructorInitializer,
+                                    ArgumentList(
+                                        SeparatedList(
+                                            new[]
+                                            {
+                                                Argument(
+                                                    IdentifierName(web3Identifier)),
+                                                Argument(
+                                                    IdentifierName(abiParamIdentifier)),
+                                                Argument(
+                                                    IdentifierName(addressIdentifier))
+                                            }))))
+                            .WithBody(
                                 Block()))
                     .AddBaseListTypes(
                         SimpleBaseType(
-                            IdentifierName("ContractBase")));
+                            IdentifierName(baseClass)))
+                    .WithPragma();
 
                 var abis = JsonConvert.DeserializeObject<Abi[]>(x.Value.Abi);
 
