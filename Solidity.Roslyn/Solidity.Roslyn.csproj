@@ -7,7 +7,7 @@
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.19</Version>
+    <Version>0.1.20</Version>
     <Authors>Alex Zhukovskiy</Authors>
     <PackageProjectUrl>https://github.com/Pzixel/Solidity.Roslyn</PackageProjectUrl>
     <PackageTags>solidity roslyn codegeneration</PackageTags>
