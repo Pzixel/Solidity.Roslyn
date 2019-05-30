@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
@@ -18,7 +17,7 @@ namespace Solidity.Roslyn.Core
                              new HexBigInteger(0),
                              functionInput: functionInput);
 
-            if (result.Status.Value != BigInteger.One)
+            if (result.HasErrors() ?? false)
             {
                 throw new TransactionFailedException(result);
             }
