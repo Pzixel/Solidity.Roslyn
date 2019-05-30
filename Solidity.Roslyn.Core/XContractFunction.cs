@@ -17,12 +17,19 @@ namespace Solidity.Roslyn.Core
                              new HexBigInteger(0),
                              functionInput: functionInput);
 
-            if (result.HasErrors() ?? false)
+            if (HasErrors(result) ?? false)
             {
                 throw new TransactionFailedException(result);
             }
 
             return result;
+        }
+
+        private static bool? HasErrors(TransactionReceipt receipt)
+        {
+            if (receipt.Status?.HexValue == null)
+                return new bool?();
+            return receipt.Status.Value == 0L;
         }
     }
 }
