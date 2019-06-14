@@ -311,6 +311,7 @@ namespace Solidity.Roslyn
                                GetUsingDirective("System", "Threading", "Tasks"),
                                GetUsingDirective("Nethereum", "ABI", "FunctionEncoding", "Attributes"),
                                GetUsingDirective("Nethereum", "Contracts"),
+                               GetUsingDirective("Nethereum", "Hex", "HexTypes"),
                                GetUsingDirective("Nethereum", "RPC", "Eth", "DTOs"),
                                GetUsingDirective("Nethereum", "Web3"),
                                GetUsingDirective("Solidity", "Roslyn", "Core"))
@@ -600,6 +601,7 @@ namespace Solidity.Roslyn
                                                                          SyntaxToken binIdentifier,
                                                                          IdentifierNameSyntax[] initializerParameters)
         {
+            var gasIdentifier = Identifier("gas");
             var constructorParameters = new[]
                 {
                     Parameter(
@@ -607,7 +609,18 @@ namespace Solidity.Roslyn
                         .WithType(
                             IdentifierName("Web3"))
                 }.Concat(methodParameters)
-                .ToArray();
+                 .Concat(new[]
+                 {
+                     Parameter(
+                             gasIdentifier)
+                         .WithType(
+                             IdentifierName("HexBigInteger"))
+                         .WithDefault(
+                             EqualsValueClause(
+                                 LiteralExpression(
+                                     SyntaxKind.NullLiteralExpression)))
+                 })
+                 .ToArray();
 
             var receiptSyntaxToken = Identifier("receipt");
             var deployedContractSyntaxToken = Identifier("deployedContract");
@@ -649,6 +662,8 @@ namespace Solidity.Roslyn
                                                             IdentifierName(abiIdentifier)),
                                                         Argument(
                                                             IdentifierName(binIdentifier)),
+                                                        Argument(
+                                                            IdentifierName(gasIdentifier)),
                                                         Argument(
                                                             ArrayCreationExpression(
                                                                     ArrayType(

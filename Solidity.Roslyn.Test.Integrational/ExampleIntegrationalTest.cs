@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 using Solidity.Roslyn.Core;
@@ -14,11 +15,11 @@ namespace Solidity.Roslyn.Test.Integrational
     {
         private const ulong X = 10;
         private const ulong Y = 20;
-        private readonly Web3 Web3;
+        private readonly Web3 _web3;
 
         public ExampleIntegrationalTest()
         {
-            Web3 = XWeb3.GetInstance(EthereumSettings.ParityConnectionString,
+            _web3 = XWeb3.GetInstance(EthereumSettings.ParityConnectionString,
                                      EthereumSettings.AccountAddress,
                                      EthereumSettings.AccountPassword);
         }
@@ -27,6 +28,18 @@ namespace Solidity.Roslyn.Test.Integrational
         public async Task Should_Deploy()
         {
             var sample = await GetSampleContractAsync();
+
+            ulong x = await sample.XAsync();
+            ulong y = await sample.YAsync();
+
+            Assert.Equal(X, x);
+            Assert.Equal(Y, y);
+        }
+
+        [Fact]
+        public async Task Should_DeployWithCustomGas()
+        {
+            var sample = await GetSampleContractAsync(new HexBigInteger(1_000_000));
 
             ulong x = await sample.XAsync();
             ulong y = await sample.YAsync();
@@ -114,7 +127,7 @@ namespace Solidity.Roslyn.Test.Integrational
         {
             var sample = await GetSampleContractAsync();
 
-            var mostRecentBlockBeforeIndexingStarted = await Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var mostRecentBlockBeforeIndexingStarted = await _web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
             var countBefore = await sample.GreetCountAsync();
             await sample.GreetAsync();
             var countAfter = await sample.GreetCountAsync();
@@ -140,6 +153,6 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal(await sample.OwnerAsync(), await sampleAsBase.OwnerAsync());
         }
 
-        private Task<SampleContract> GetSampleContractAsync() => SampleContract.DeployAsync(Web3, X, Y);
+        private Task<SampleContract> GetSampleContractAsync(HexBigInteger gas = null) => SampleContract.DeployAsync(_web3, X, Y, gas);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Exceptions;
 using Nethereum.Web3;
@@ -82,7 +83,7 @@ namespace Solidity.Roslyn.Core
 
         public static bool IsEmptyAddress(string address) => string.IsNullOrEmpty(address) || address == EmptyAddress;
 
-        protected static async Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string contractByteCode, params object[] values)
+        protected static async Task<TransactionReceipt> DeployAsync(Web3 web3, string abi, string contractByteCode, HexBigInteger gas = null, params object[] values)
         {
             try
             {
@@ -90,7 +91,7 @@ namespace Solidity.Roslyn.Core
                                   abi,
                                   contractByteCode,
                                   web3.TransactionManager.Account.Address,
-                                  EthereumSettings.DeploymentGas,
+                                  gas ?? EthereumSettings.DeploymentGas,
                                   values: values);
                 return receipt;
             }
