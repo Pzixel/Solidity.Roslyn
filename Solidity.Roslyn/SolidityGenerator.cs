@@ -523,7 +523,7 @@ namespace Solidity.Roslyn
                     .AddMembers(outputParameters
                                     .Select((output,
                                              i) => PropertyDeclaration(IdentifierName(output.Type),
-                                                                       output.Name)
+                                                                       output.Name.Trim('_'))
                                                 .WithAttributeLists(
                                                     SingletonList(
                                                         AttributeList(

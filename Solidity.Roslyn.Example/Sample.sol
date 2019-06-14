@@ -41,7 +41,7 @@ contract SampleContract is Owned {
         return a;
     }
 
-    function testTuplePartialNames(uint8 a, uint16 b, uint32 d) public pure returns (int16 m, int32 n, int64) {
+    function testTuplePartialNames(uint8 a, uint16 b, uint32 d) public pure returns (int16 m_, int32 n_, int64) {
         return (int16(a), int32(b), int64(d));
     }
 
