@@ -153,6 +153,15 @@ namespace Solidity.Roslyn.Test.Integrational
             Assert.Equal(await sample.OwnerAsync(), await sampleAsBase.OwnerAsync());
         }
 
+
+        [Fact]
+        public async Task Should_SendTxWithCustomGas()
+        {
+            var sample = await GetSampleContractAsync();
+
+            await sample.NoParamsAsync(new HexBigInteger(1_000_000));
+        }
+
         private Task<SampleContract> GetSampleContractAsync(HexBigInteger gas = null) => SampleContract.DeployAsync(_web3, X, Y, gas);
     }
 }

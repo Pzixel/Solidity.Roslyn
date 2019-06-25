@@ -9,11 +9,12 @@ namespace Solidity.Roslyn.Core
     {
         public static async Task<TransactionReceipt> SendDefaultTransactionAndWaitForReceiptAsync(this Function function,
                                                                                                   string accountAddress,
+                                                                                                  HexBigInteger gas = null,
                                                                                                   params object[] functionInput)
         {
             var result = await function.SendTransactionAndWaitForReceiptAsync(
                              accountAddress,
-                             EthereumSettings.TxGas,
+                             gas ?? EthereumSettings.TxGas,
                              new HexBigInteger(0),
                              functionInput: functionInput);
 

@@ -447,6 +447,7 @@ namespace Solidity.Roslyn
                                                                                 ParameterSyntax[] methodParameters,
                                                                                 SyntaxToken contractProperty)
         {
+            var gasIdentifier = Identifier("gas");
             var sendTxCallParameters = new[]
                 {
                     Argument(
@@ -459,9 +460,25 @@ namespace Solidity.Roslyn
                                     IdentifierName("Web3"),
                                     IdentifierName("TransactionManager")),
                                 IdentifierName("Account")),
-                            IdentifierName("Address")))
+                            IdentifierName("Address"))),
+                    Argument(
+                        IdentifierName(gasIdentifier))
                 }.Concat(callParameters)
-                .ToArray();
+                 .ToArray();
+
+            var parameters = methodParameters
+                             .Concat(new[]
+                             {
+                                 Parameter(
+                                         gasIdentifier)
+                                     .WithType(
+                                         IdentifierName("HexBigInteger"))
+                                     .WithDefault(
+                                         EqualsValueClause(
+                                             LiteralExpression(
+                                                 SyntaxKind.NullLiteralExpression)))
+                             })
+                             .ToArray();
 
             return MethodDeclaration(
                     GenericName(
@@ -471,7 +488,7 @@ namespace Solidity.Roslyn
                     Identifier(Capitalize(abi.Name) + "Async"))
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
-                    methodParameters)
+                    parameters)
                 .WithExpressionBody(
                     ArrowExpressionClause(
                         InvocationExpression(
