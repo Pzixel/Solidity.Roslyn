@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+
+
 namespace Solidity.Roslyn
 {
     public class SolcOutput
