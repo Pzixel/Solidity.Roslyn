@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Test", "Solidity.Roslyn.Test\Solidity.Roslyn.Test.csproj", "{D33C0355-C15E-4473-A970-0019DE16A155}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn", "Solidity.Roslyn\Solidity.Roslyn.csproj", "{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Example", "Solidity.Roslyn.Example\Solidity.Roslyn.Example.csproj", "{78A34A43-489D-4F17-BD3A-4E6CB89E6134}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Core", "Solidity.Roslyn.Core\Solidity.Roslyn.Core.csproj", "{3E1051D9-5586-4FCF-8955-AB2BED703ADC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solidity.Roslyn.Test.Integrational", "Solidity.Roslyn.Test.Integrational\Solidity.Roslyn.Test.Integrational.csproj", "{24BA406A-74ED-4FA4-A8BD-F698137D16EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solidity.SampleApp", "Solidity.SampleApp\Solidity.SampleApp.csproj", "{59334645-323F-4BF1-9DC8-68804266B978}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D33C0355-C15E-4473-A970-0019DE16A155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D33C0355-C15E-4473-A970-0019DE16A155}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D33C0355-C15E-4473-A970-0019DE16A155}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D33C0355-C15E-4473-A970-0019DE16A155}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EDD15A5-FDCE-4DBA-B575-40E537764AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -31,14 +23,10 @@ Global
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78A34A43-489D-4F17-BD3A-4E6CB89E6134}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E1051D9-5586-4FCF-8955-AB2BED703ADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E1051D9-5586-4FCF-8955-AB2BED703ADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E1051D9-5586-4FCF-8955-AB2BED703ADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E1051D9-5586-4FCF-8955-AB2BED703ADC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24BA406A-74ED-4FA4-A8BD-F698137D16EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24BA406A-74ED-4FA4-A8BD-F698137D16EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24BA406A-74ED-4FA4-A8BD-F698137D16EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24BA406A-74ED-4FA4-A8BD-F698137D16EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59334645-323F-4BF1-9DC8-68804266B978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59334645-323F-4BF1-9DC8-68804266B978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59334645-323F-4BF1-9DC8-68804266B978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59334645-323F-4BF1-9DC8-68804266B978}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
