@@ -56,4 +56,4 @@ For more details see `Example` project
 
 Also you may find [Solidity code highlighter](https://github.com/Pzixel/Solidity) useful.
 
-[This playground](https://github.com/orbita-center/parity-poa-playground/) was used to run integrational tests. If you have different connection settings put them in `EthereumSettings` class in `Solidity.Roslyn.Test.Integrational` project.
+[This playground](https://github.com/Pzixel/parity-poa-playground) was used to run integrational tests. If you have different connection settings put them in `EthereumSettings` class in `Solidity.Roslyn.Test.Integrational` project.
